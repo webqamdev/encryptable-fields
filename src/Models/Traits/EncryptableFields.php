@@ -135,6 +135,6 @@ trait EncryptableFields
             throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
         }
 
-        $query->where($this->encryptable[$key], $value);
+        $query->where($this->encryptable[$key], self::hashValue($value));
     }
 }
