@@ -18,7 +18,30 @@ composer require thomascombe/encryptable-fields
 ## Usage
 
 ``` php
-// Usage description here
+<?php
+
+namespace App\Models;
+
+use Thomascombe\EncryptableFields\Models\Traits\EncryptableFields;
+
+class User extends
+{
+    use EncryptableFields;
+
+    const COLUMN_USER_LASTNAME = 'user_lastname';
+    const COLUMN_USER_LASTNAME_HASH = 'user_lastname_hash';
+    const COLUMN_USER_FIRSTNAME = 'user_firstname';
+    const COLUMN_USER_FIRSTNAME_HASH = 'user_firstname_hash';
+
+    protected $encryptable = [
+        self::COLUMN_USER_FIRSTNAME => self::COLUMN_USER_FIRSTNAME_HASH,
+        self::COLUMN_USER_LASTNAME => self::COLUMN_USER_LASTNAME_HASH,
+    ];
+```
+
+To find user :
+```php
+User::where(User::COLUMN_USER_FIRSTNAME_HASH, self::hashValue('watson');
 ```
 
 ### Testing
