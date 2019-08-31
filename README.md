@@ -1,10 +1,10 @@
-# Very short description of the package
+# Eloquent model encrypted fields
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/thomascombe/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/thomascombe/encryptable-fields)
 [![Total Downloads](https://img.shields.io/packagist/dt/thomascombe/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/thomascombe/encryptable-fields)
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
-
+Allow you to encrypt some model fields. You can add a hashed field to allow sql query
+ 
 ## Installation
 
 You can install the package via composer:
@@ -30,10 +30,12 @@ class User extends
     const COLUMN_USER_LASTNAME_HASH = 'user_lastname_hash';
     const COLUMN_USER_FIRSTNAME = 'user_firstname';
     const COLUMN_USER_FIRSTNAME_HASH = 'user_firstname_hash';
+    const COLUMN_USER_MAIL = 'user_mail';
 
     protected $encryptable = [
         self::COLUMN_USER_FIRSTNAME => self::COLUMN_USER_FIRSTNAME_HASH,
         self::COLUMN_USER_LASTNAME => self::COLUMN_USER_LASTNAME_HASH,
+        self::COLUMN_USER_MAIL,
     ];
 ```
 
@@ -71,14 +73,9 @@ Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recen
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
-### Security
-
-If you discover any security related issues, please email thomascombe42@gmail.com instead of using the issue tracker.
-
 ## Credits
 
 - [Thomas Combe](https://github.com/thomascombe)
-- [All Contributors](../../contributors)
 
 ## License
 
