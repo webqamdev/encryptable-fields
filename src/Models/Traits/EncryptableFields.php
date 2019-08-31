@@ -96,7 +96,7 @@ trait EncryptableFields
      */
     public static function hashValue(?string $value): ?string
     {
-        return $value ? sha1($value . config('encryptable-fields.encryption_salt')) : null;
+        return $value ? sha1($value . config('encryptable-fields.hash_salt')) : null;
     }
 
     /**
