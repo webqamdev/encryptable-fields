@@ -2,6 +2,8 @@
 
 namespace Thomascombe\EncryptableFields\Models\Traits;
 
+use Illuminate\Database\Query\Builder;
+use Thomascombe\EncryptableFields\Exceptions\NotHashedFieldException;
 use Thomascombe\EncryptableFields\Services\EncryptionInterface;
 
 /**
@@ -16,15 +18,37 @@ use Thomascombe\EncryptableFields\Services\EncryptionInterface;
 trait EncryptableFields
 {
     /**
+     * Check if a field is encryptable
+     *
+     * @param string $key
+     * @return bool
+     */
+    private function isEncryptable(string $key): bool
+    {
+        return in_array($key, array_keys($this->encryptable));
+    }
+
+    /**
+     * checked if field is hashable
+     *
+     * @param string $key
+     * @return bool
+     */
+    private function isHashable(string $key): bool
+    {
+        return $this->isEncryptable($key) && !empty($this->encryptable[$key]);
+    }
+
+    /**
      * Set a given attribute on the model.
      *
-     * @param  string $key
-     * @param  mixed  $value
+     * @param string $key
+     * @param mixed $value
      * @return mixed
      */
     public function setAttribute($key, $value)
     {
-        if (!$this->hasSetMutator($key) && $this->isHashed($key)) {
+        if (!$this->hasSetMutator($key) && $this->isHashable($key)) {
             $this->setHashedAttribute($this->encryptable[$key], $value);
         }
 
@@ -35,16 +59,14 @@ trait EncryptableFields
         return parent::setAttribute($key, $value);
     }
 
-    public function isEncryptable(string $key): bool
-    {
-        return in_array($key, array_keys($this->encryptable));
-    }
-
-    public function isHashed(string $key): bool
-    {
-        return $this->isEncryptable($key) && !empty($this->encryptable[$key]);
-    }
-
+    /**
+     * Save encryptable attribute
+     *
+     * @param string $key
+     * @param $value
+     * @return $this
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     public function setEncryptedAttribute(string $key, $value)
     {
         $this->attributes[$key] = app()->make(EncryptionInterface::class)->encrypt($value);
@@ -52,6 +74,13 @@ trait EncryptableFields
         return $this;
     }
 
+    /**
+     * Save hashable attribute
+     *
+     * @param string $key
+     * @param $value
+     * @return $this
+     */
     public function setHashedAttribute(string $key, $value)
     {
         $this->attributes[$key] = self::hashValue($value);
@@ -59,6 +88,12 @@ trait EncryptableFields
         return $this;
     }
 
+    /**
+     * Hash a value to save in field or to SQL request
+     *
+     * @param string|null $value
+     * @return string|null
+     */
     public static function hashValue(?string $value): ?string
     {
         return $value ? sha1($value . config('encryptable-fields.encryption_salt')) : null;
@@ -67,7 +102,7 @@ trait EncryptableFields
     /**
      * Get an attribute from the $attributes array.
      *
-     * @param  string $key
+     * @param string $key
      * @return mixed
      */
     protected function getAttributeFromArray($key)
@@ -81,6 +116,25 @@ trait EncryptableFields
 
     public function getEncryptedAttribute(string $key)
     {
-        return empty($this->attributes[$key]) ? null : app()->make(EncryptionInterface::class)->decrypt($this->attributes[$key]);
+        return empty($this->attributes[$key])
+            ? null
+            : app()->make(EncryptionInterface::class)->decrypt($this->attributes[$key]);
+    }
+
+    /**
+     * A scope to search for encrypted values in the database
+     * @param Builder $query The QueryBuilder
+     * @param string $key The column name
+     * @param string $value The non-encrypted value to search for
+     * @return void
+     * @throws NotHashedFieldException
+     */
+    public function scopeWhereEncrypted($query, $key, $value)
+    {
+        if (!$this->isHashable($key)) {
+            throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
+        }
+
+        $query->where($this->encryptable[$key], $value);
     }
 }

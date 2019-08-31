@@ -39,9 +39,24 @@ class User extends
     ];
 ```
 
-To find user :
+### Create
+```php
+User::create(
+    [
+        User::COLUMN_USER_FIRSTNAME => 'watson',
+        User::COLUMN_USER_LASTNAME => 'jack',
+    ]
+);
+```
+
+To find Model :
 ```php
 User::where(User::COLUMN_USER_FIRSTNAME_HASH, self::hashValue('watson');
+```
+
+or 
+``` php
+User::whereEncrypted(User::COLUMN_USER_FIRSTNAME, 'watson')->get()
 ```
 
 ### Testing
