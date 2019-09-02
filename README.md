@@ -1,4 +1,4 @@
-# Eloquent model encrypted fields
+# Eloquent model encrypted fields for Laravel
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/thomascombe/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/thomascombe/encryptable-fields)
 [![Total Downloads](https://img.shields.io/packagist/dt/thomascombe/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/thomascombe/encryptable-fields)
@@ -13,6 +13,10 @@ You can install the package via composer:
 composer require thomascombe/encryptable-fields
 ```
 
+You can publish config via artisan:
+```bash
+php artisan vendor:publish --provider="Thomascombe\EncryptableFields\EncryptableFieldsServiceProvider"
+```
 ## Usage
 
 ``` php
@@ -51,7 +55,7 @@ User::create(
 
 To find Model :
 ```php
-User::where(User::COLUMN_USER_FIRSTNAME_HASH, self::hashValue('watson');
+User::where(User::COLUMN_USER_FIRSTNAME_HASH, User::hashValue('watson'));
 ```
 
 or 
