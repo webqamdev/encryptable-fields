@@ -25,7 +25,7 @@ trait EncryptableFields
      */
     private function isEncryptable(string $key): bool
     {
-        return in_array($key, array_keys($this->encryptable));
+        return array_key_exists($key, $this->encryptable);
     }
 
     /**
