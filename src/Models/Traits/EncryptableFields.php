@@ -11,6 +11,7 @@ use Thomascombe\EncryptableFields\Services\EncryptionInterface;
  *
  * @property array $attributes The attributes that should be encrypted in database.
  * @property array $encryptable The attributes that should be encrypted in database.
+ * @property array $encryptableArray Magic mutator
  *
  * @method bool hasGetMutator(string $key)
  * @method bool hasSetMutator(string $key)
@@ -25,7 +26,7 @@ trait EncryptableFields
      */
     private function isEncryptable(string $key): bool
     {
-        return array_key_exists($key, $this->encryptable);
+        return array_key_exists($key, $this->getEncryptableArray());
     }
 
     /**
@@ -36,7 +37,7 @@ trait EncryptableFields
      */
     private function isHashable(string $key): bool
     {
-        return $this->isEncryptable($key) && !empty($this->encryptable[$key]);
+        return $this->isEncryptable($key) && !empty($this->getEncryptableArray()[$key]);
     }
 
     /**
@@ -45,11 +46,12 @@ trait EncryptableFields
      * @param string $key
      * @param mixed $value
      * @return mixed
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function setAttribute($key, $value)
     {
         if (!$this->hasSetMutator($key) && $this->isHashable($key)) {
-            $this->setHashedAttribute($this->encryptable[$key], $value);
+            $this->setHashedAttribute($this->getEncryptableArray()[$key], $value);
         }
 
         if (!$this->hasSetMutator($key) && $this->isEncryptable($key)) {
@@ -135,6 +137,16 @@ trait EncryptableFields
             throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
         }
 
-        $query->where($this->encryptable[$key], self::hashValue($value));
+        $query->where($this->getEncryptableArray()[$key], self::hashValue($value));
+    }
+
+    protected function getEncryptableArray()
+    {
+        return collect($this->encryptable)->mapWithKeys(function ($value, $key) {
+            if(is_int($key)) {
+                return [$value => null];
+            }
+            return [$key => $value];
+        })->toArray();
     }
 }
