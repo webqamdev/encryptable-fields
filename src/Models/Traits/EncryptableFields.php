@@ -149,4 +149,22 @@ trait EncryptableFields
             return [$key => $value];
         })->toArray();
     }
+
+    /**
+     * Convert the model's attributes to an array.
+     *
+     * @return array
+     */
+    public function attributesToArray()
+    {
+        $attributes = parent::attributesToArray();
+
+        foreach ($this->getEncryptableArray() as $key => $value) {
+            if (isset($attributes[$key])) {
+                $attributes[$key] = $this->getAttribute($key);
+            }
+        }
+
+        return $attributes;
+    }
 }
