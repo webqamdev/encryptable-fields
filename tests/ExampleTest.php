@@ -1,6 +1,6 @@
 <?php
 
-namespace Thomascombe\EncryptableFields\Tests;
+namespace Webqamdev\EncryptableFields\Tests;
 
 use PHPUnit\Framework\TestCase;
 

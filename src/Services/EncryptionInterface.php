@@ -1,6 +1,6 @@
 <?php
 
-namespace Thomascombe\EncryptableFields\Services;
+namespace Webqamdev\EncryptableFields\Services;
 
 interface EncryptionInterface
 {

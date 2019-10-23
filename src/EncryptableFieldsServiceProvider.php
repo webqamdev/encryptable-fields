@@ -1,9 +1,9 @@
 <?php
 
-namespace Thomascombe\EncryptableFields;
+namespace Webqamdev\EncryptableFields;
 
 use Illuminate\Support\ServiceProvider;
-use Thomascombe\EncryptableFields\Services\EncryptionInterface;
+use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 
 class EncryptableFieldsServiceProvider extends ServiceProvider
 {

@@ -1,11 +1,13 @@
 {
-    "name": "thomascombe/encryptable-fields",
+    "name": "webqamdev/encryptable-fields",
     "description": "Laravel Backpack Fields Encryptable",
     "keywords": [
+        "webqamdev",
+        "webqamdeveloppement",
         "thomascombe",
         "encryptable-fields"
     ],
-    "homepage": "https://github.com/thomascombe/encryptable-fields",
+    "homepage": "https://github.com/webqamdev/encryptable-fields",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -25,12 +27,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Thomascombe\\EncryptableFields\\": "src"
+            "Webqamdev\\EncryptableFields\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Thomascombe\\EncryptableFields\\Tests\\": "tests"
+            "Webqamdev\\EncryptableFields\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -44,7 +46,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Thomascombe\\EncryptableFields\\EncryptableFieldsServiceProvider"
+                "Webqamdev\\EncryptableFields\\EncryptableFieldsServiceProvider"
             ]
         }
     }

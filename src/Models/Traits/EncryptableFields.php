@@ -1,10 +1,10 @@
 <?php
 
-namespace Thomascombe\EncryptableFields\Models\Traits;
+namespace Webqamdev\EncryptableFields\Models\Traits;
 
 use Illuminate\Database\Query\Builder;
-use Thomascombe\EncryptableFields\Exceptions\NotHashedFieldException;
-use Thomascombe\EncryptableFields\Services\EncryptionInterface;
+use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
+use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 
 /**
  * Trait EncryptedTrait

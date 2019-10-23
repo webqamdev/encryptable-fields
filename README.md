@@ -1,7 +1,7 @@
 # Eloquent model encrypted fields for Laravel
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/thomascombe/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/thomascombe/encryptable-fields)
-[![Total Downloads](https://img.shields.io/packagist/dt/thomascombe/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/thomascombe/encryptable-fields)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/webqamdev/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/webqamdev/encryptable-fields)
+[![Total Downloads](https://img.shields.io/packagist/dt/webqamdev/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/webqamdev/encryptable-fields)
 
 Allow you to encrypt some model fields. You can add a hashed field to allow sql query
  
@@ -10,12 +10,12 @@ Allow you to encrypt some model fields. You can add a hashed field to allow sql 
 You can install the package via composer:
 
 ```bash
-composer require thomascombe/encryptable-fields
+composer require webqamdev/encryptable-fields
 ```
 
 You can publish config via artisan:
 ```bash
-php artisan vendor:publish --provider="Thomascombe\EncryptableFields\EncryptableFieldsServiceProvider"
+php artisan vendor:publish --provider="Webqamdev\EncryptableFields\EncryptableFieldsServiceProvider"
 ```
 ## Usage
 
@@ -24,7 +24,7 @@ php artisan vendor:publish --provider="Thomascombe\EncryptableFields\Encryptable
 
 namespace App\Models;
 
-use Thomascombe\EncryptableFields\Models\Traits\EncryptableFields;
+use Webqamdev\EncryptableFields\Models\Traits\EncryptableFields;
 
 class User extends
 {
