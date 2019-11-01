@@ -24,7 +24,7 @@ trait EncryptableFields
      * @param string $key
      * @return bool
      */
-    private function isEncryptable(string $key): bool
+    public function isEncryptable(string $key): bool
     {
         return array_key_exists($key, $this->getEncryptableArray());
     }
@@ -35,7 +35,7 @@ trait EncryptableFields
      * @param string $key
      * @return bool
      */
-    private function isHashable(string $key): bool
+    public function isHashable(string $key): bool
     {
         return $this->isEncryptable($key) && !empty($this->getEncryptableArray()[$key]);
     }
@@ -140,7 +140,7 @@ trait EncryptableFields
         $query->where($this->getEncryptableArray()[$key], self::hashValue($value));
     }
 
-    protected function getEncryptableArray()
+    public function getEncryptableArray()
     {
         return collect($this->encryptable)->mapWithKeys(function ($value, $key) {
             if(is_int($key)) {
