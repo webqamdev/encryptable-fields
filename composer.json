@@ -19,6 +19,8 @@
     ],
     "require": {
         "php": "^7.1",
+        "ext-openssl": "*",
+        "ext-json": "*",
         "illuminate/support": ">=5.8"
     },
     "require-dev": {
