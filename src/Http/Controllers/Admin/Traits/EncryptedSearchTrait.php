@@ -32,10 +32,11 @@ trait EncryptedSearchTrait
 
     protected function formatClause(string $column): string
     {
-        $format = 'convert(aes_decrypt(from_base64(json_value(from_base64(`%s`), "$.value")), "%s") USING utf8mb4)';
+        $format = 'convert(aes_decrypt(from_base64(json_value(from_base64(%s), "$.value")), "%s") USING utf8mb4)';
+        $escapedColumn = sprintf('`%s`', str_replace('.', '`.`', $column));
         $key = app()->get('databaseEncrypter')->getKey();
 
-        return sprintf($format, $column, $key);
+        return sprintf($format, $escapedColumn, $key);
     }
 
     protected function encryptedOrderLogic(Builder $query, $columns, string $columnDirection): Builder
