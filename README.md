@@ -63,6 +63,47 @@ or
 User::whereEncrypted(User::COLUMN_USER_FIRSTNAME, 'watson')->get()
 ```
 
+### Searchable encrypted values
+
+[MySQL](https://dev.mysql.com/doc/refman/8.0/en/encryption-functions.html#function_aes-decrypt) and [MariaDB](https://mariadb.com/kb/en/aes_decrypt/) both provide an `aes_decrypt` function, allowing to decrypt values directly when querying. It then becomes possible to use this function to filter or sort encrypted values.
+
+However, Laravel's default encrypter only handles `AES-128-CBC` and `AES-256-CBC` cipher methods, where `MySQL` and `MariaDB` requires `AES-128-ECB`.
+
+In order to use this function, it is required to override Laravel's default encrypter, which is done in [DatabaseEncrypter.php](./src/Encryption/DatabaseEncrypter.php).
+
+Include [DatabaseEncryptionServiceProvider](./src/Providers/DatabaseEncryptionServiceProvider.php) in your `app.config.php`, so that a singleton instance will be registered in your project, under `databaseEncrypter` key:
+
+```php
+return [
+    // ...
+
+    'providers' => [
+        // ...
+
+        /*
+         * Package Service Providers...
+         */
+        Webqamdev\EncryptableFields\Providers\DatabaseEncryptionServiceProvider::class,
+
+        // ...
+    ],
+    
+    // ...
+];
+```
+
+Then override this package's configuration in `encryptable-fields.php` file:
+
+```php
+return [
+    // Need to implement EncryptionInterface
+    'encryption' => Webqamdev\EncryptableFields\Services\DatabaseEncryption::class,
+    'hash_salt' => '--mDwt\k+PY,}vUJf2WeYUJ]yb(7A?>>bu7fGZrDpRUn#-kab'
+];
+```
+
+Finally, if you're using [Laravel Backpack](https://backpackforlaravel.com) in your project, a trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Traits/EncryptedSearchTrait.php) provides methods to customize search and order logics.
+
 ### Testing
 
 ``` bash
