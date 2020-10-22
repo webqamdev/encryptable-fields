@@ -2,6 +2,9 @@
 
 namespace Webqamdev\EncryptableFields\Console;
 
+use Illuminate\Encryption\Encrypter;
+use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
+
 class KeyGenerateCommand extends \Illuminate\Foundation\Console\KeyGenerateCommand
 {
     /**
@@ -36,6 +39,18 @@ class KeyGenerateCommand extends \Illuminate\Foundation\Console\KeyGenerateComma
         $this->laravel['config']['encryptable-fields.key'] = $key;
 
         $this->info('Application key set successfully.');
+    }
+
+    /**
+     * Generate a random key for the application.
+     *
+     * @return string
+     */
+    protected function generateRandomKey()
+    {
+        return 'base64:'.base64_encode(
+                Encrypter::generateKey(DatabaseEncrypter::CIPHER)
+            );
     }
 
     /**
