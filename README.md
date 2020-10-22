@@ -71,7 +71,7 @@ However, Laravel's default encrypter only handles `AES-128-CBC` and `AES-256-CBC
 
 In order to use this function, it is required to override Laravel's default encrypter, which is done in [DatabaseEncrypter.php](./src/Encryption/DatabaseEncrypter.php).
 
-Include [DatabaseEncryptionServiceProvider](./src/Providers/DatabaseEncryptionServiceProvider.php) in your `app.config.php`, so that a singleton instance will be registered in your project, under `databaseEncrypter` key:
+Include [DatabaseEncryptionServiceProvider](./src/Providers/DatabaseEncryptionServiceProvider.php) in your `config/app.php`, so that a singleton instance will be registered in your project, under `databaseEncrypter` key:
 
 ```php
 return [
