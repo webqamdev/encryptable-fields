@@ -3,6 +3,7 @@
 namespace Webqamdev\EncryptableFields;
 
 use Illuminate\Support\ServiceProvider;
+use Webqamdev\EncryptableFields\Console\KeyGenerateCommand;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 
 class EncryptableFieldsServiceProvider extends ServiceProvider
@@ -27,5 +28,8 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
         // Automatically apply the package configuration
         $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'encryptable-fields');
         $this->app->bind(EncryptionInterface::class, config('encryptable-fields.encryption'));
+        $this->commands([
+            KeyGenerateCommand::class,
+        ]);
     }
 }

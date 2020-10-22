@@ -13,6 +13,13 @@ You can install the package via composer:
 composer require webqamdev/encryptable-fields
 ```
 
+Complete `.env` : 
+```
+APP_DB_ENCRYPTION_KEY=
+```
+
+Run `php artisan encryptable-fields:key-generate`
+
 You can publish config via artisan:
 ```bash
 php artisan vendor:publish --provider="Webqamdev\EncryptableFields\EncryptableFieldsServiceProvider"
@@ -96,6 +103,7 @@ Then override this package's configuration in `encryptable-fields.php` file:
 
 ```php
 return [
+    'key' => config('APP_DB_ENCRYPTION_KEY'),
     // Need to implement EncryptionInterface
     'encryption' => Webqamdev\EncryptableFields\Services\DatabaseEncryption::class,
     'hash_salt' => '--mDwt\k+PY,}vUJf2WeYUJ]yb(7A?>>bu7fGZrDpRUn#-kab'
