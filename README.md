@@ -3,8 +3,8 @@
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/webqamdev/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/webqamdev/encryptable-fields)
 [![Total Downloads](https://img.shields.io/packagist/dt/webqamdev/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/webqamdev/encryptable-fields)
 
-Allow you to encrypt some model fields. You can add a hashed field to allow sql query
- 
+Allow you to encrypt model's fields. You can add a hashed field to allow SQL query.
+
 ## Installation
 
 You can install the package via composer:
@@ -13,104 +13,96 @@ You can install the package via composer:
 composer require webqamdev/encryptable-fields
 ```
 
-Complete `.env` : 
+Add the following variable in your `.env` file:
+
 ```
 APP_DB_ENCRYPTION_KEY=
 ```
 
-Run `php artisan encryptable-fields:key-generate`
+then run `php artisan encryptable-fields:key-generate` command to generate a database encryption key.
 
-You can publish config via artisan:
+⚠️ You shouldn't generate this key on your own because ciphers differ between Laravel (`AES-128-CBC` and `AES-256-CBC`)
+and MySQL/MariaDB (`AES-128-ECB`).
+
+You can publish the configuration via Artisan:
+
 ```bash
 php artisan vendor:publish --provider="Webqamdev\EncryptableFields\EncryptableFieldsServiceProvider"
 ```
+
 ## Usage
 
-``` php
+To work with this package, you need to use our `EncryptableFields` trait in your models, then override
+the `$encryptable` property. This array allows you to define encryptable attributes in your model.
+
+You can also add attributes to contain a hash of the non encrypted value, which might be useful in order to execute a
+fast full match for a given searched value.
+
+To do so, you need to use the `$encryptable` property as an associative array, where encryptable attributes are keys and
+associated hashed attributes are values.
+
+```php
 <?php
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Webqamdev\EncryptableFields\Models\Traits\EncryptableFields;
 
-class User extends
+class User extends Model
 {
     use EncryptableFields;
 
-    const COLUMN_USER_LASTNAME = 'user_lastname';
-    const COLUMN_USER_LASTNAME_HASH = 'user_lastname_hash';
-    const COLUMN_USER_FIRSTNAME = 'user_firstname';
-    const COLUMN_USER_FIRSTNAME_HASH = 'user_firstname_hash';
-    const COLUMN_USER_MAIL = 'user_mail';
+    const COLUMN_LASTNAME = 'lastname';
+    const COLUMN_LASTNAME_HASH = 'lastname_hash';
+    const COLUMN_FIRSTNAME = 'firstname';
+    const COLUMN_FIRSTNAME_HASH = 'firstname_hash';
+    const COLUMN_EMAIL = 'mail';
 
+    /**
+     * The attributes that should be encrypted in database.
+     * 
+     * @var string[] 
+     */
     protected $encryptable = [
-        self::COLUMN_USER_FIRSTNAME => self::COLUMN_USER_FIRSTNAME_HASH,
-        self::COLUMN_USER_LASTNAME => self::COLUMN_USER_LASTNAME_HASH,
-        self::COLUMN_USER_MAIL,
+        self::COLUMN_FIRSTNAME => self::COLUMN_FIRSTNAME_HASH,
+        self::COLUMN_LASTNAME => self::COLUMN_LASTNAME_HASH,
+        self::COLUMN_EMAIL,
     ];
 ```
 
-### Create
+To create a new model, simply do it as before:
+
 ```php
 User::create(
     [
-        User::COLUMN_USER_FIRSTNAME => 'watson',
-        User::COLUMN_USER_LASTNAME => 'jack',
+        User::COLUMN_FIRSTNAME => 'watson',
+        User::COLUMN_LASTNAME => 'jack',
     ]
 );
 ```
 
-To find Model :
+To find a model from a hashed value:
+
 ```php
-User::where(User::COLUMN_USER_FIRSTNAME_HASH, User::hashValue('watson'));
+User::where(User::COLUMN_FIRSTNAME_HASH, User::hashValue('watson'))->first();
 ```
 
-or 
+or use the model's local scope:
+
 ``` php
-User::whereEncrypted(User::COLUMN_USER_FIRSTNAME, 'watson')->get()
+User::whereEncrypted(User::COLUMN_FIRSTNAME, 'watson')->first()();
 ```
 
 ### Searchable encrypted values
 
-[MySQL](https://dev.mysql.com/doc/refman/8.0/en/encryption-functions.html#function_aes-decrypt) and [MariaDB](https://mariadb.com/kb/en/aes_decrypt/) both provide an `aes_decrypt` function, allowing to decrypt values directly when querying. It then becomes possible to use this function to filter or sort encrypted values.
+[MySQL](https://dev.mysql.com/doc/refman/8.0/en/encryption-functions.html#function_aes-decrypt)
+and [MariaDB](https://mariadb.com/kb/en/aes_decrypt/) both provide an `aes_decrypt` function, allowing to decrypt values
+directly when querying. It then becomes possible to use this function to filter or sort encrypted values.
 
-However, Laravel's default encrypter only handles `AES-128-CBC` and `AES-256-CBC` cipher methods, where `MySQL` and `MariaDB` requires `AES-128-ECB`.
-
-In order to use this function, it is required to override Laravel's default encrypter, which is done in [DatabaseEncrypter.php](./src/Encryption/DatabaseEncrypter.php).
-
-Include [DatabaseEncryptionServiceProvider](./src/Providers/DatabaseEncryptionServiceProvider.php) in your `config/app.php`, so that a singleton instance will be registered in your project, under `databaseEncrypter` key:
-
-```php
-return [
-    // ...
-
-    'providers' => [
-        // ...
-
-        /*
-         * Package Service Providers...
-         */
-        Webqamdev\EncryptableFields\Providers\DatabaseEncryptionServiceProvider::class,
-
-        // ...
-    ],
-    
-    // ...
-];
-```
-
-Then override this package's configuration in `encryptable-fields.php` file:
-
-```php
-return [
-    'key' => config('APP_DB_ENCRYPTION_KEY'),
-    // Need to implement EncryptionInterface
-    'encryption' => Webqamdev\EncryptableFields\Services\DatabaseEncryption::class,
-    'hash_salt' => '--mDwt\k+PY,}vUJf2WeYUJ]yb(7A?>>bu7fGZrDpRUn#-kab'
-];
-```
-
-Finally, if you're using [Laravel Backpack](https://backpackforlaravel.com) in your project, a trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Traits/EncryptedSearchTrait.php) provides methods to customize search and order logics.
+If you're using [Laravel Backpack](https://backpackforlaravel.com) in your project, a
+trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Traits/EncryptedSearchTrait.php) provides methods to customize
+search and order logics.
 
 ### Testing
 
