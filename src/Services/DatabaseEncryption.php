@@ -2,8 +2,6 @@
 
 namespace Webqamdev\EncryptableFields\Services;
 
-use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
-
 class DatabaseEncryption implements EncryptionInterface
 {
     /**
@@ -14,12 +12,7 @@ class DatabaseEncryption implements EncryptionInterface
      */
     public static function encrypt($value): string
     {
-        return self::getService()->encrypt($value);
-    }
-
-    protected static function getService(): DatabaseEncrypter
-    {
-        return app()->get('databaseEncrypter');
+        return dbEncrypt($value);
     }
 
     /**
@@ -30,6 +23,6 @@ class DatabaseEncryption implements EncryptionInterface
      */
     public static function decrypt(string $value)
     {
-        return self::getService()->decrypt($value);
+        return dbDecrypt($value);
     }
 }
