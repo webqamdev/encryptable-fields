@@ -2,6 +2,7 @@
 
 namespace Webqamdev\EncryptableFields\Models\Traits;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Query\Builder;
 use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
@@ -46,7 +47,7 @@ trait EncryptableFields
      * @param string $key
      * @param mixed $value
      * @return mixed
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function setAttribute($key, $value)
     {
@@ -67,7 +68,7 @@ trait EncryptableFields
      * @param string $key
      * @param $value
      * @return $this
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws BindingResolutionException
      */
     public function setEncryptedAttribute(string $key, $value)
     {
@@ -131,7 +132,7 @@ trait EncryptableFields
      * @return void
      * @throws NotHashedFieldException
      */
-    public function scopeWhereEncrypted($query, $key, $value)
+    public function scopeWhereEncrypted(Builder $query, string $key, string $value): void
     {
         if (!$this->isHashable($key)) {
             throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
@@ -140,14 +141,16 @@ trait EncryptableFields
         $query->where($this->getEncryptableArray()[$key], self::hashValue($value));
     }
 
-    public function getEncryptableArray()
+    public function getEncryptableArray(): array
     {
-        return collect($this->encryptable)->mapWithKeys(function ($value, $key) {
-            if(is_int($key)) {
-                return [$value => null];
-            }
-            return [$key => $value];
-        })->toArray();
+        return collect($this->encryptable)
+            ->mapWithKeys(function ($value, $key) {
+                if (is_int($key)) {
+                    return [$value => null];
+                }
+                return [$key => $value];
+            })
+            ->toArray();
     }
 
     /**
