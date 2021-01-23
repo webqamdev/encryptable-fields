@@ -4,6 +4,7 @@ namespace Webqamdev\EncryptableFields;
 
 use Illuminate\Support\ServiceProvider;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
+use Webqamdev\EncryptableFields\Validation\DatabasePresenceVerifier;
 
 class EncryptableFieldsServiceProvider extends ServiceProvider
 {
@@ -28,7 +29,9 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'encryptable-fields');
         $this->app->bind(EncryptionInterface::class, config('encryptable-fields.encryption'));
 
-        $this->loadHelpers();
+        $this
+            ->loadHelpers()
+            ->registerPresenceVerifier();
     }
 
     /**
@@ -37,6 +40,15 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
     public function loadHelpers(): self
     {
         require_once __DIR__ . '/helpers.php';
+
+        return $this;
+    }
+
+    protected function registerPresenceVerifier(): self
+    {
+        $this->app->extend('validation.presence', function ($presenceVerifier, $app) {
+            return new DatabasePresenceVerifier($app['db']);
+        });
 
         return $this;
     }
