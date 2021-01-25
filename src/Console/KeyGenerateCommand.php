@@ -81,9 +81,11 @@ class KeyGenerateCommand extends BaseCommand
      */
     protected function keyReplacementPattern()
     {
-        $escaped = preg_quote('=' . $this->laravel['config'][self::CONFIG_KEY], '/');
-
-        return "/^" . self::ENV_VARIABLE_NAME . "{$escaped}/m";
+        return sprintf(
+            "/^%s=%s/m",
+            self::ENV_VARIABLE_NAME,
+            preg_quote($this->laravel['config'][self::CONFIG_KEY], '/')
+        );
     }
 
     /**
