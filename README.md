@@ -4,7 +4,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/webqamdev/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/webqamdev/encryptable-fields)
 
 Allow you to encrypt some model fields. You can add a hashed field to allow sql query
- 
+
 ## Installation
 
 You can install the package via composer:
@@ -14,9 +14,11 @@ composer require webqamdev/encryptable-fields
 ```
 
 You can publish config via artisan:
+
 ```bash
 php artisan vendor:publish --provider="Webqamdev\EncryptableFields\EncryptableFieldsServiceProvider"
 ```
+
 ## Usage
 
 ``` php
@@ -44,6 +46,7 @@ class User extends
 ```
 
 ### Create
+
 ```php
 User::create(
     [
@@ -54,24 +57,31 @@ User::create(
 ```
 
 To find Model :
+
 ```php
 User::where(User::COLUMN_USER_FIRSTNAME_HASH, User::hashValue('watson'));
 ```
 
-or 
+or
+
 ``` php
 User::whereEncrypted(User::COLUMN_USER_FIRSTNAME, 'watson')->get()
 ```
 
 ### Searchable encrypted values
 
-[MySQL](https://dev.mysql.com/doc/refman/8.0/en/encryption-functions.html#function_aes-decrypt) and [MariaDB](https://mariadb.com/kb/en/aes_decrypt/) both provide an `aes_decrypt` function, allowing to decrypt values directly when querying. It then becomes possible to use this function to filter or sort encrypted values.
+[MySQL](https://dev.mysql.com/doc/refman/8.0/en/encryption-functions.html#function_aes-decrypt)
+and [MariaDB](https://mariadb.com/kb/en/aes_decrypt/) both provide an `aes_decrypt` function, allowing to decrypt values
+directly when querying. It then becomes possible to use this function to filter or sort encrypted values.
 
-However, Laravel's default encrypter only handles `AES-128-CBC` and `AES-256-CBC` cipher methods, where `MySQL` and `MariaDB` requires `AES-128-ECB`.
+However, Laravel's default encrypter only handles `AES-128-CBC` and `AES-256-CBC` cipher methods, where `MySQL`
+and `MariaDB` requires `AES-128-ECB`.
 
-In order to use this function, it is required to override Laravel's default encrypter, which is done in [DatabaseEncrypter.php](./src/Encryption/DatabaseEncrypter.php).
+In order to use this function, it is required to override Laravel's default encrypter, which is done
+in [DatabaseEncrypter.php](./src/Encryption/DatabaseEncrypter.php).
 
-Include [DatabaseEncryptionServiceProvider](./src/Providers/DatabaseEncryptionServiceProvider.php) in your `app.config.php`, so that a singleton instance will be registered in your project, under `databaseEncrypter` key:
+Include [DatabaseEncryptionServiceProvider](./src/Providers/DatabaseEncryptionServiceProvider.php) in
+your `app.config.php`, so that a singleton instance will be registered in your project, under `databaseEncrypter` key:
 
 ```php
 return [
@@ -102,7 +112,57 @@ return [
 ];
 ```
 
-Finally, if you're using [Laravel Backpack](https://backpackforlaravel.com) in your project, a trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Traits/EncryptedSearchTrait.php) provides methods to customize search and order logics.
+Finally, if you're using [Laravel Backpack](https://backpackforlaravel.com) in your project, a
+trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Traits/EncryptedSearchTrait.php) provides methods to customize
+search and order logics.
+
+### Validation
+
+This package comes with two rules to validate uniqueness for a hashed or encrypted attribute.
+
+They work as an extension for `Illuminate\Validation\Rules\Unique`.
+
+#### Hashed
+
+```php
+use Webqamdev\EncryptableFields\Rules\Unique\Hashed;
+
+/**
+ * Get the validation rules that apply to the request.
+ *
+ * @return array
+ */
+public function rules(): array
+{
+    return [
+        'email' => [
+            new Hashed(User::class, 'email'),
+            // or new Hashed('users', 'email'),
+        ],
+    ];
+}
+```
+
+#### Encrypted
+
+```php
+use Webqamdev\EncryptableFields\Rules\Unique\Encrypted;
+
+/**
+ * Get the validation rules that apply to the request.
+ *
+ * @return array
+ */
+public function rules(): array
+{
+    return [
+        'email' => [
+            new Encrypted(User::class, 'email'),
+            // or new Encrypted('users', 'email'),
+        ],
+    ];
+}
+```
 
 ### Testing
 
