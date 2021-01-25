@@ -80,7 +80,7 @@ User::where(User::COLUMN_FIRSTNAME_HASH, User::hashValue('watson'))->first();
 or use the model's local scope:
 
 ```php
-User::whereEncrypted(User::COLUMN_FIRSTNAME, 'watson')->first()();
+User::whereEncrypted(User::COLUMN_FIRSTNAME, 'watson')->first();
 ```
 
 ### Searchable encrypted values
@@ -89,7 +89,7 @@ User::whereEncrypted(User::COLUMN_FIRSTNAME, 'watson')->first()();
 and [MariaDB](https://mariadb.com/kb/en/aes_decrypt/) both provide an `aes_decrypt` function, allowing to decrypt values
 directly when querying. It then becomes possible to use this function to filter or sort encrypted values.
 
-However, Laravel's default encrypter only handles `AES-128-CBC` and `AES-256-CBC` cipher methods, where `MySQL`
+However, Laravel default encrypter only handles `AES-128-CBC` and `AES-256-CBC` cipher methods, where `MySQL`
 and `MariaDB` requires `AES-128-ECB`. We're going to use two different keys.
 
 To do so, add the following variable to your `.env` file:
@@ -100,8 +100,7 @@ APP_DB_ENCRYPTION_KEY=
 
 and run `php artisan encryptable-fields:key-generate` command to generate a database encryption key.
 
-⚠️ You shouldn't generate this key on your own because ciphers differ between Laravel (`AES-128-CBC` and `AES-256-CBC`)
-and MySQL/MariaDB (`AES-128-ECB`).
+⚠️ You shouldn't generate this key on your own because ciphers differ between Laravel and MySQL/MariaDB.
 
 Then, it is required to override Laravel's default encrypter, which is done
 in [DatabaseEncrypter.php](./src/Encryption/DatabaseEncrypter.php).
@@ -132,10 +131,12 @@ Finally, override the package configuration in `encryptable-fields.php` file:
 
 ```php
 return [
-    'key' => config('APP_DB_ENCRYPTION_KEY'),
+    // ...
+
     // Need to implement EncryptionInterface
     'encryption' => Webqamdev\EncryptableFields\Services\DatabaseEncryption::class,
-    'hash_salt' => '--mDwt\k+PY,}vUJf2WeYUJ]yb(7A?>>bu7fGZrDpRUn#-kab'
+
+    // ...
 ];
 ```
 
