@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('hashValue')) {
+if (!function_exists('dbHashValue')) {
     /**
      * Hash the given value.
      *
@@ -8,7 +8,7 @@ if (!function_exists('hashValue')) {
      * @param string $algorithm
      * @return string
      */
-    function hashValue(string $data, string $algorithm = 'sha1'): string
+    function dbHashValue(string $data, string $algorithm = 'sha1'): string
     {
         return hash($algorithm, $data . config('encryptable-fields.hash_salt'));
     }

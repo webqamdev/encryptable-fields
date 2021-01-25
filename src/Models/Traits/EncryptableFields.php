@@ -85,7 +85,7 @@ trait EncryptableFields
      */
     public function setHashedAttribute(string $key, $value)
     {
-        $this->attributes[$key] = hashValue($value);
+        $this->attributes[$key] = dbHashValue($value);
 
         return $this;
     }
@@ -126,7 +126,7 @@ trait EncryptableFields
             throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
         }
 
-        $query->where($this->getEncryptableArray()[$key], hashValue($value));
+        $query->where($this->getEncryptableArray()[$key], dbHashValue($value));
     }
 
     public function getEncryptableArray()

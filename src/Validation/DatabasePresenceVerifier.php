@@ -24,7 +24,7 @@ class DatabasePresenceVerifier extends BaseDatabasePresenceVerifier
 
         if (empty($extra['is_encrypted'])) {
             if (!empty($extra['is_hashed'])) {
-                $value = hashValue($value);
+                $value = dbHashValue($value);
                 unset($extra['is_hashed']);
             }
 
