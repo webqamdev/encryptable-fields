@@ -3,8 +3,8 @@
 namespace Webqamdev\EncryptableFields;
 
 use Illuminate\Support\ServiceProvider;
+use RuntimeException;
 use Webqamdev\EncryptableFields\Console\KeyGenerateCommand;
-use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 
 class EncryptableFieldsServiceProvider extends ServiceProvider
@@ -12,7 +12,7 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      */
-    public function boot()
+    public function boot(): void
     {
         if ($this->app->runningInConsole()) {
             $this->publishConfiguration();
@@ -34,13 +34,12 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
     /**
      * Register the application services.
      */
-    public function register()
+    public function register(): void
     {
         $this
             ->mergeConfiguration()
             ->registerBindings()
             ->registerCommands()
-            ->registerDatabaseEncrypter()
             ->loadHelpers();
     }
 
@@ -54,24 +53,12 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
         return $this;
     }
 
-    protected function registerDatabaseEncrypter(): self
-    {
-        $this->app->singleton('databaseEncrypter', function ($app) {
-            $config = $app->make('config')->get('encryptable-fields');
-
-            return new DatabaseEncrypter($this->key($config));
-        });
-
-        return $this;
-    }
-
     /**
      * Extract the encryption key from the given configuration.
      *
-     * @param  array  $config
+     * @param array $config
      * @return string
-     *
-     * @throws \RuntimeException
+     * @throws RuntimeException
      */
     protected function key(array $config)
     {
