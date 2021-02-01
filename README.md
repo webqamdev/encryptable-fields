@@ -4,7 +4,6 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/webqamdev/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/webqamdev/encryptable-fields)
 
 Allow you to encrypt model's fields. You can add a hashed field to allow SQL query.
-
 ## Installation
 
 You can install the package via composer:
@@ -14,7 +13,6 @@ composer require webqamdev/encryptable-fields
 ```
 
 You can publish the configuration via Artisan:
-
 ```bash
 php artisan vendor:publish --provider="Webqamdev\EncryptableFields\EncryptableFieldsServiceProvider"
 ```
@@ -61,7 +59,6 @@ class User extends Model
 ```
 
 To create a new model, simply do it as before:
-
 ```php
 User::create(
     [
@@ -72,12 +69,11 @@ User::create(
 ```
 
 To find a model from a hashed value:
-
 ```php
 User::where(User::COLUMN_FIRSTNAME_HASH, User::hashValue('watson'))->first();
 ```
 
-or use the model's local scope:
+oruse the model's local scope:
 
 ```php
 User::whereEncrypted(User::COLUMN_FIRSTNAME, 'watson')->first();
@@ -143,6 +139,54 @@ return [
 If you're using [Laravel Backpack](https://backpackforlaravel.com) in your project, a
 trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Traits/EncryptedSearchTrait.php) provides methods to customize
 search and order logics.
+
+### Validation
+
+This package comes with two rules to validate uniqueness for a hashed or encrypted attribute.
+
+They work as an extension for `Illuminate\Validation\Rules\Unique`.
+
+#### Hashed
+
+```php
+use Webqamdev\EncryptableFields\Rules\Unique\Hashed;
+
+/**
+ * Get the validation rules that apply to the request.
+ *
+ * @return array
+ */
+public function rules(): array
+{
+    return [
+        'email' => [
+            new Hashed(User::class, 'email'),
+            // or new Hashed('users', 'email'),
+        ],
+    ];
+}
+```
+
+#### Encrypted
+
+```php
+use Webqamdev\EncryptableFields\Rules\Unique\Encrypted;
+
+/**
+ * Get the validation rules that apply to the request.
+ *
+ * @return array
+ */
+public function rules(): array
+{
+    return [
+        'email' => [
+            new Encrypted(User::class, 'email'),
+            // or new Encrypted('users', 'email'),
+        ],
+    ];
+}
+```
 
 ### Testing
 

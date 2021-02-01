@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use RuntimeException;
 use Webqamdev\EncryptableFields\Console\KeyGenerateCommand;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
+use Webqamdev\EncryptableFields\Validation\DatabasePresenceVerifier;
 
 class EncryptableFieldsServiceProvider extends ServiceProvider
 {
@@ -53,24 +54,6 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
         return $this;
     }
 
-    /**
-     * Extract the encryption key from the given configuration.
-     *
-     * @param array $config
-     * @return string
-     * @throws RuntimeException
-     */
-    protected function key(array $config)
-    {
-        return tap($config['key'], function ($key) {
-            if (empty($key)) {
-                throw new RuntimeException(
-                    'No application encryption key has been specified.'
-                );
-            }
-        });
-    }
-
     protected function registerCommands(): self
     {
         $this->commands([
@@ -92,5 +75,36 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'encryptable-fields');
 
         return $this;
+
+        $this
+            ->loadHelpers()
+            ->registerPresenceVerifier();
+    }
+
+    protected function registerPresenceVerifier(): self
+    {
+        $this->app->extend('validation.presence', function ($presenceVerifier, $app) {
+            return new DatabasePresenceVerifier($app['db']);
+        });
+
+        return $this;
+    }
+
+    /**
+     * Extract the encryption key from the given configuration.
+     *
+     * @param array $config
+     * @return string
+     * @throws RuntimeException
+     */
+    protected function key(array $config)
+    {
+        return tap($config['key'], function ($key) {
+            if (empty($key)) {
+                throw new RuntimeException(
+                    'No application encryption key has been specified.'
+                );
+            }
+        });
     }
 }

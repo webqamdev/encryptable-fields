@@ -86,20 +86,9 @@ trait EncryptableFields
      */
     public function setHashedAttribute(string $key, $value)
     {
-        $this->attributes[$key] = self::hashValue($value);
+        $this->attributes[$key] = dbHashValue($value);
 
         return $this;
-    }
-
-    /**
-     * Hash a value to save in field or to SQL request
-     *
-     * @param string|null $value
-     * @return string|null
-     */
-    public static function hashValue(?string $value): ?string
-    {
-        return $value ? sha1($value . config('encryptable-fields.hash_salt')) : null;
     }
 
     /**
@@ -138,7 +127,7 @@ trait EncryptableFields
             throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
         }
 
-        $query->where($this->getEncryptableArray()[$key], self::hashValue($value));
+        $query->where($this->getEncryptableArray()[$key], dbHashValue($value));
     }
 
     public function getEncryptableArray(): array
