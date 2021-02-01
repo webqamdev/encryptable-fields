@@ -188,6 +188,11 @@ public function rules(): array
 }
 ```
 
+### Hide decrypt value in log
+If your application use [spatie/laravel-activitylog](https://github.com/spatie/laravel-activitylog) or [webqamdev/activity-logger-for-laravel](https://github.com/webqamdev/activity-logger-for-laravel) :  
+Add `HasEncryptableFieldsLog` trait in each model with logs.  
+This trait print encrypted values in log instead of decrypt values.
+
 ### Testing
 
 ``` bash
