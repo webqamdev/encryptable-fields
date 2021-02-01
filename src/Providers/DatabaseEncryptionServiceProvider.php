@@ -12,7 +12,7 @@ class DatabaseEncryptionServiceProvider extends BaseEncryptionServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->registerDatabaseEncrypter();
     }
@@ -25,9 +25,9 @@ class DatabaseEncryptionServiceProvider extends BaseEncryptionServiceProvider
     protected function registerDatabaseEncrypter(): void
     {
         $this->app->singleton('databaseEncrypter', function ($app) {
-            $config = $app->make('config')->get('app');
+            $config = $app->make('config')->get('encryptable-fields');
 
-            return new DatabaseEncrypter($this->parseKey($config));
+            return new DatabaseEncrypter($this->key($config));
         });
     }
 }

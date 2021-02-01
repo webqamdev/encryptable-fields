@@ -65,7 +65,7 @@ class DatabaseEncrypter extends BaseEncrypter
      * @return string
      * @throws EncryptException
      */
-    public function encrypt($value, $serialize = false)
+    public function encrypt($value, $serialize = true)
     {
         $iv = '';
 
@@ -106,7 +106,7 @@ class DatabaseEncrypter extends BaseEncrypter
      * @return mixed
      * @throws DecryptException
      */
-    public function decrypt($payload, $unserialize = false)
+    public function decrypt($payload, $unserialize = true)
     {
         return parent::decrypt($payload, $unserialize);
     }
