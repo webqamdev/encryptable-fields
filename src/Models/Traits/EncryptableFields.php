@@ -3,7 +3,7 @@
 namespace Webqamdev\EncryptableFields\Models\Traits;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 
