@@ -8,7 +8,7 @@ if (!function_exists('dbEncrypt')) {
      * @param bool $serialize
      * @return string
      */
-    function dbEncrypt($value, bool $serialize = true): string
+    function dbEncrypt($value, bool $serialize = false): string
     {
         return app('databaseEncrypter')->encrypt($value, $serialize);
     }
@@ -22,7 +22,7 @@ if (!function_exists('dbDecrypt')) {
      * @param bool $unserialize
      * @return mixed
      */
-    function dbDecrypt(string $value, bool $unserialize = true)
+    function dbDecrypt(string $value, bool $unserialize = false)
     {
         return app('databaseEncrypter')->decrypt($value, $unserialize);
     }
