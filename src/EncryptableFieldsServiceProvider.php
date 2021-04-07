@@ -38,6 +38,7 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this
+            ->registerPresenceVerifier()
             ->mergeConfiguration()
             ->registerBindings()
             ->registerCommands()
@@ -75,10 +76,6 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'encryptable-fields');
 
         return $this;
-
-        $this
-            ->loadHelpers()
-            ->registerPresenceVerifier();
     }
 
     protected function registerPresenceVerifier(): self
