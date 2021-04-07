@@ -166,11 +166,32 @@ CRUD::addColumn([
 
 ### Validation
 
-This package comes with two rules to validate uniqueness for a hashed or encrypted attribute.
+This package comes with some rules to validate existence and uniqueness for a hashed or encrypted attribute.
 
-They work as an extension for `Illuminate\Validation\Rules\Unique`.
+They work as extensions for `Illuminate\Validation\Rules\Exists` and `Illuminate\Validation\Rules\Unique`.
 
 #### Hashed
+
+```php
+use Webqamdev\EncryptableFields\Rules\Exists\Hashed;
+
+/**
+ * Get the validation rules that apply to the request.
+ *
+ * @return array
+ */
+public function rules(): array
+{
+    return [
+        'email' => [
+            new Hashed(User::class, 'email'),
+            // or new Hashed('users', 'email'),
+        ],
+    ];
+}
+```
+
+and
 
 ```php
 use Webqamdev\EncryptableFields\Rules\Unique\Hashed;
@@ -192,6 +213,27 @@ public function rules(): array
 ```
 
 #### Encrypted
+
+```php
+use Webqamdev\EncryptableFields\Rules\Exists\Encrypted;
+
+/**
+ * Get the validation rules that apply to the request.
+ *
+ * @return array
+ */
+public function rules(): array
+{
+    return [
+        'email' => [
+            new Encrypted(User::class, 'email'),
+            // or new Encrypted('users', 'email'),
+        ],
+    ];
+}
+```
+
+and
 
 ```php
 use Webqamdev\EncryptableFields\Rules\Unique\Encrypted;
