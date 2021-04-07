@@ -77,10 +77,30 @@ To find a model from a hashed value:
 User::where(User::COLUMN_FIRSTNAME_HASH, User::hashValue('watson'))->first();
 ```
 
-oruse the model's local scope:
+or use the model's local scope:
 
 ```php
 User::whereEncrypted(User::COLUMN_FIRSTNAME, 'watson')->first();
+```
+
+### Authentication
+
+An auth provider, `eloquent-hashed`, is registered by this package and allows to authenticate users on a hashed
+attribute, per example an email. To use it, simply change your auth configuration as follows:
+
+```php
+return [
+    // ...
+    
+    'providers' => [
+        'users' => [
+            'driver' => 'eloquent-hashed',
+            'model' => App\Models\User::class,
+        ],
+    ],
+    
+    // ...
+];
 ```
 
 ### Searchable encrypted values
