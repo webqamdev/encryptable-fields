@@ -2,8 +2,10 @@
 
 namespace Webqamdev\EncryptableFields;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use RuntimeException;
+use Webqamdev\EncryptableFields\Auth\EloquentHashedUserProvider;
 use Webqamdev\EncryptableFields\Console\KeyGenerateCommand;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 use Webqamdev\EncryptableFields\Validation\DatabasePresenceVerifier;
@@ -18,6 +20,8 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishConfiguration();
         }
+
+        $this->bootAuthProviders();
     }
 
     protected function publishConfiguration(): self
@@ -28,6 +32,15 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
             ],
             'config'
         );
+
+        return $this;
+    }
+
+    protected function bootAuthProviders(): self
+    {
+        Auth::provider('eloquent-hashed', function ($app, array $config) {
+            return new EloquentHashedUserProvider($this->app['hash'], $config['model']);
+        });
 
         return $this;
     }
