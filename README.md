@@ -4,6 +4,7 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/webqamdev/encryptable-fields.svg?style=flat-square)](https://packagist.org/packages/webqamdev/encryptable-fields)
 
 Allow you to encrypt model's fields. You can add a hashed field to allow SQL query.
+
 ## Installation
 
 You can install the package via composer:
@@ -13,6 +14,7 @@ composer require webqamdev/encryptable-fields
 ```
 
 You can publish the configuration via Artisan:
+
 ```bash
 php artisan vendor:publish --provider="Webqamdev\EncryptableFields\EncryptableFieldsServiceProvider"
 ```
@@ -59,6 +61,7 @@ class User extends Model
 ```
 
 To create a new model, simply do it as before:
+
 ```php
 User::create(
     [
@@ -69,6 +72,7 @@ User::create(
 ```
 
 To find a model from a hashed value:
+
 ```php
 User::where(User::COLUMN_FIRSTNAME_HASH, User::hashValue('watson'))->first();
 ```
@@ -135,6 +139,9 @@ return [
     // ...
 ];
 ```
+
+⚠️ With [DatabaseEncrypter.php](./src/Encryption/DatabaseEncrypter.php), values are not serialized in order to allow
+querying with exact values (`=` instead of `like` operator), which means it won't handle object instances or arrays.
 
 If you're using [Laravel Backpack](https://backpackforlaravel.com) in your project, a
 trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Traits/EncryptedSearchTrait.php) provides methods to customize
@@ -206,7 +213,9 @@ public function rules(): array
 ```
 
 ### Hide decrypt value in log
-If your application use [spatie/laravel-activitylog](https://github.com/spatie/laravel-activitylog) or [webqamdev/activity-logger-for-laravel](https://github.com/webqamdev/activity-logger-for-laravel) :  
+
+If your application use [spatie/laravel-activitylog](https://github.com/spatie/laravel-activitylog)
+or [webqamdev/activity-logger-for-laravel](https://github.com/webqamdev/activity-logger-for-laravel) :  
 Add `HasEncryptableFieldsLog` trait in each model with logs.  
 This trait print encrypted values in log instead of decrypt values.
 
