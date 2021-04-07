@@ -140,6 +140,23 @@ If you're using [Laravel Backpack](https://backpackforlaravel.com) in your proje
 trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Traits/EncryptedSearchTrait.php) provides methods to customize
 search and order logics.
 
+```php
+use Illuminate\Database\Eloquent\Builder;
+
+CRUD::addColumn([
+    // ...
+    
+    'searchLogic' => function (Builder $query, array $column, string $searchTerm): void {
+        $this->encryptedSearchLogic($query, $column['name'], $searchTerm);
+    },
+    'orderLogic' => function (Builder $query, array $column, string $columnDirection): void {
+        $this->encryptedOrderLogic($query, $column['name'], $columnDirection);
+    },
+    
+    // ...
+]);
+```
+
 ### Validation
 
 This package comes with two rules to validate uniqueness for a hashed or encrypted attribute.
