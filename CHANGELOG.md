@@ -2,6 +2,11 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 2.1.0 - 2021-04-07
+
+- Add exists rules
+- Add `eloquent-hashed` auth provider
+
 ## 2.0.0 - 2021-04-07
 
 - Fix presence verifier registration in service provider
