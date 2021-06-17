@@ -4,6 +4,8 @@ namespace Webqamdev\EncryptableFields\Console;
 
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Foundation\Console\KeyGenerateCommand as BaseCommand;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
 
 class KeyGenerateCommand extends BaseCommand
@@ -27,6 +29,13 @@ class KeyGenerateCommand extends BaseCommand
      */
     public function handle()
     {
+        if (!$this->hasEnvironmentVariable()) {
+            $this->error(
+                sprintf("Missing environment variable. Please add %s= to your .env file.", self::ENV_VARIABLE_NAME)
+            );
+            return;
+        }
+
         $key = $this->generateRandomKey();
 
         if ($this->option('show')) {
@@ -43,6 +52,16 @@ class KeyGenerateCommand extends BaseCommand
         $this->laravel['config'][self::CONFIG_KEY] = $key;
 
         $this->info('Application key set successfully.');
+    }
+
+    protected function hasEnvironmentVariable(): bool
+    {
+        return Str::contains(
+            File::get(
+                $this->laravel->environmentFilePath()
+            ),
+            self::ENV_VARIABLE_NAME . '='
+        );
     }
 
     /**
