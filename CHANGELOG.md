@@ -2,6 +2,10 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 2.1.1 - 2021-06-17
+
+- Check APP_DB_ENCRYPTION_KEY env variable existence when generating key
+
 ## 2.1.0 - 2021-04-07
 
 - Add exists rules
