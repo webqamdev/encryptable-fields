@@ -27,7 +27,7 @@ class KeyGenerateCommand extends BaseCommand
      *
      * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         if (!$this->hasEnvironmentVariable()) {
             $this->error(
@@ -39,7 +39,8 @@ class KeyGenerateCommand extends BaseCommand
         $key = $this->generateRandomKey();
 
         if ($this->option('show')) {
-            return $this->line('<comment>' . $key . '</comment>');
+            $this->line('<comment>' . $key . '</comment>');
+            return;
         }
 
         // Next, we will replace the application key in the environment file so it is
@@ -69,7 +70,7 @@ class KeyGenerateCommand extends BaseCommand
      *
      * @return string
      */
-    protected function generateRandomKey()
+    protected function generateRandomKey(): string
     {
         return 'base64:' . base64_encode(Encrypter::generateKey(DatabaseEncrypter::CIPHER));
     }
@@ -80,7 +81,7 @@ class KeyGenerateCommand extends BaseCommand
      * @param string $key
      * @return bool
      */
-    protected function setKeyInEnvironmentFile($key)
+    protected function setKeyInEnvironmentFile($key): bool
     {
         $currentKey = $this->laravel['config'][self::CONFIG_KEY];
 
@@ -94,26 +95,12 @@ class KeyGenerateCommand extends BaseCommand
     }
 
     /**
-     * Get a regex pattern that will match env APP_KEY with any random key.
-     *
-     * @return string
-     */
-    protected function keyReplacementPattern()
-    {
-        return sprintf(
-            "/^%s=%s/m",
-            self::ENV_VARIABLE_NAME,
-            preg_quote($this->laravel['config'][self::CONFIG_KEY], '/')
-        );
-    }
-
-    /**
      * Write a new environment file with the given key.
      *
      * @param string $key
      * @return void
      */
-    protected function writeNewEnvironmentFileWith($key)
+    protected function writeNewEnvironmentFileWith($key): void
     {
         $environmentFilePath = $this->laravel->environmentFilePath();
 
@@ -124,6 +111,20 @@ class KeyGenerateCommand extends BaseCommand
                 self::ENV_VARIABLE_NAME . '=' . $key,
                 file_get_contents($environmentFilePath)
             )
+        );
+    }
+
+    /**
+     * Get a regex pattern that will match env APP_KEY with any random key.
+     *
+     * @return string
+     */
+    protected function keyReplacementPattern(): string
+    {
+        return sprintf(
+            "/^%s=%s/m",
+            self::ENV_VARIABLE_NAME,
+            preg_quote($this->laravel['config'][self::CONFIG_KEY], '/')
         );
     }
 }
