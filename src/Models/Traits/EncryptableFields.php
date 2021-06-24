@@ -64,6 +64,7 @@ trait EncryptableFields
                 return $this->setEncryptedAttribute($key, $value);
             } else {
                 $this->attributes[$key] = null;
+                return $this;
             }
         }
 
