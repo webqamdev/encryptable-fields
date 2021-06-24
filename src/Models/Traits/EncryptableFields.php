@@ -52,11 +52,19 @@ trait EncryptableFields
     public function setAttribute($key, $value)
     {
         if (!$this->hasSetMutator($key) && $this->isHashable($key)) {
-            $this->setHashedAttribute($this->getEncryptableArray()[$key], $value);
+            if (!empty($value)) {
+                $this->setHashedAttribute($this->getEncryptableArray()[$key], $value);
+            } else {
+                $this->attributes[$this->getEncryptableArray()[$key]] = null;
+            }
         }
 
         if (!$this->hasSetMutator($key) && $this->isEncryptable($key)) {
-            return $this->setEncryptedAttribute($key, $value);
+            if (!empty($value)) {
+                return $this->setEncryptedAttribute($key, $value);
+            } else {
+                $this->attributes[$key] = null;
+            }
         }
 
         return parent::setAttribute($key, $value);
