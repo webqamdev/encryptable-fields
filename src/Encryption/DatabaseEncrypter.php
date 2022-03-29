@@ -101,13 +101,61 @@ class DatabaseEncrypter extends BaseEncrypter
     /**
      * Decrypt the given value.
      *
-     * @param  string  $payload
-     * @param  bool  $unserialize
+     * @param string $payload
+     * @param bool $unserialize
      * @return mixed
      * @throws DecryptException
      */
     public function decrypt($payload, $unserialize = false)
     {
-        return parent::decrypt($payload, $unserialize);
+        $payload = $this->getJsonPayload($payload);
+
+        $iv = base64_decode($payload['iv']);
+
+        $tag = empty($payload['tag']) ? null : base64_decode($payload['tag']);
+
+        // Here we will decrypt the value. If we are able to successfully decrypt it
+        // we will then unserialize it and return it out to the caller. If we are
+        // unable to decrypt this value we will throw out an exception message.
+        $decrypted = openssl_decrypt(
+            $payload['value'],
+            $this->cipher,
+            $this->key,
+            0,
+            $iv,
+            $tag
+        );
+
+        if ($decrypted === false) {
+            throw new DecryptException('Could not decrypt the data.');
+        }
+
+        return $unserialize ? unserialize($decrypted) : $decrypted;
+    }
+
+    /**
+     * Get the JSON array from the given payload.
+     *
+     * @param string $payload
+     * @return array
+     *
+     * @throws DecryptException
+     */
+    protected function getJsonPayload($payload)
+    {
+        $payload = json_decode(base64_decode($payload), true);
+
+        // If the payload is not valid JSON or does not have the proper keys set we will
+        // assume it is invalid and bail out of the routine since we will not be able
+        // to decrypt the given value. We'll also check the MAC for this encryption.
+        if (!$this->validPayload($payload)) {
+            throw new DecryptException('The payload is invalid.');
+        }
+
+        if (!$this->validMac($payload)) {
+            throw new DecryptException('The MAC is invalid.');
+        }
+
+        return $payload;
     }
 }
