@@ -2,6 +2,14 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 2.1.3 - 2022-03-29
+
+- Implement decrypt method instead of extending due to incompatibility with last version of Laravel
+
+## 2.1.2 - 2021-06-24
+
+- Allow to save null value on encrypted column
+
 ## 2.1.1 - 2021-06-17
 
 - Check APP_DB_ENCRYPTION_KEY env variable existence when generating key
