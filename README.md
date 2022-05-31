@@ -5,6 +5,10 @@
 
 Allow you to encrypt model's fields. You can add a hashed field to allow SQL query.
 
+## Summary
+
+[[_TOC_]]
+
 ## Installation
 
 You can install the package via composer:
@@ -280,6 +284,19 @@ If your application use [spatie/laravel-activitylog](https://github.com/spatie/l
 or [webqamdev/activity-logger-for-laravel](https://github.com/webqamdev/activity-logger-for-laravel) :  
 Add `HasEncryptableFieldsLog` trait in each model with logs.  
 This trait print encrypted values in log instead of decrypt values.
+
+### Fixing a bad implementation
+
+If you miss-implemented this package and it's configuration (ie: data are not well encrypted, you forgot to init an encrypt key, ...),
+you will be able to fix this by using the available command. 
+
+First fix the missing/wrong configuration, then run this command : 
+
+```shell
+php artisan encryptable-fields:fix-missing-key {ModelFQN} [--processed-fields=field1,field2,...]
+```
+
+Also, a trait is available if you want to write your own fix command : `\Webqamdev\EncryptableFields\Console\Traits\FixEncryptTrait`
 
 ### Testing
 
