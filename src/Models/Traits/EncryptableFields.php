@@ -51,7 +51,13 @@ trait EncryptableFields
      */
     public function setAttribute($key, $value)
     {
-        if (!$this->hasSetMutator($key) && $this->isHashable($key)) {
+        $hasSetMutator = $this->hasSetMutator($key);
+
+        if (!$hasSetMutator && method_exists($this, 'hasAttributeSetMutator')) {
+            $hasSetMutator = $this->hasAttributeSetMutator($key);
+        }
+
+        if (!$hasSetMutator && $this->isHashable($key)) {
             if (!empty($value)) {
                 $this->setHashedAttribute($this->getEncryptableArray()[$key], $value);
             } else {
@@ -59,7 +65,7 @@ trait EncryptableFields
             }
         }
 
-        if (!$this->hasSetMutator($key) && $this->isEncryptable($key)) {
+        if (!$hasSetMutator && $this->isEncryptable($key)) {
             if (!empty($value)) {
                 return $this->setEncryptedAttribute($key, $value);
             } else {
