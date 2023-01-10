@@ -2,6 +2,14 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 2.2.1 - 2023-01-10
+
+- Handle attribute set mutators
+
+## 2.2.0 - 2022-05-24
+
+- Laravel 9 compatibility
+
 ## 2.1.3 - 2022-03-29
 
 - Implement decrypt method instead of extending due to incompatibility with last version of Laravel
