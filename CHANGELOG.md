@@ -2,6 +2,14 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 2.2.3 - 2023-01-27
+
+- Add parentheses to ternary operation
+
+## 2.2.2 - 2023-01-26
+
+- Fix PHP 8.1 deprecation
+
 ## 2.2.1 - 2023-01-10
 
 - Handle attribute set mutators
