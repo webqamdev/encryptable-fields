@@ -73,7 +73,7 @@ class DatabaseEncrypter extends BaseEncrypter
         // will proceed to calculating a MAC for the encrypted value so that this
         // value can be verified later as not having been changed by the users.
         $value = openssl_encrypt(
-            $serialize && $value ? serialize($value) : $value,
+            ($serialize && $value) ? serialize($value) : $value,
             $this->cipher,
             $this->key,
             0,
