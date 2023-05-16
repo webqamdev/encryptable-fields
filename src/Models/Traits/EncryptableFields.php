@@ -123,9 +123,7 @@ trait EncryptableFields
 
     public function getEncryptedAttribute(string $key)
     {
-        return empty($this->attributes[$key])
-            ? null
-            : app()->make(EncryptionInterface::class)->decrypt($this->attributes[$key]);
+        return empty($this->attributes[$key]) ? null : $this->getDecryptValue($key);
     }
 
     /**
@@ -173,5 +171,26 @@ trait EncryptableFields
         }
 
         return $attributes;
+    }
+
+    protected function getDecryptValue(string $key)
+    {
+        return app()->make(EncryptionInterface::class)->decrypt($this->attributes[$key]);
+    }
+
+    /**
+     * Get the value of an "Attribute" return type marked attribute using its mutator.
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function mutateAttributeMarkedAttribute($key, $value)
+    {
+        if (!array_key_exists($key, $this->attributeCastCache) && $this->isEncryptable($key)) {
+            $value = $this->getDecryptValue($key);
+        }
+
+        return parent::mutateAttributeMarkedAttribute($key, $value);
     }
 }
