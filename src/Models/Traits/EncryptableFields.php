@@ -20,28 +20,6 @@ use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 trait EncryptableFields
 {
     /**
-     * Check if a field is encryptable
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function isEncryptable(string $key): bool
-    {
-        return array_key_exists($key, $this->getEncryptableArray());
-    }
-
-    /**
-     * checked if field is hashable
-     *
-     * @param string $key
-     * @return bool
-     */
-    public function isHashable(string $key): bool
-    {
-        return $this->isEncryptable($key) && !empty($this->getEncryptableArray()[$key]);
-    }
-
-    /**
      * Set a given attribute on the model.
      *
      * @param string $key
@@ -78,6 +56,54 @@ trait EncryptableFields
     }
 
     /**
+     * checked if field is hashable
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function isHashable(string $key): bool
+    {
+        return $this->isEncryptable($key) && !empty($this->getEncryptableArray()[$key]);
+    }
+
+    /**
+     * Check if a field is encryptable
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function isEncryptable(string $key): bool
+    {
+        return array_key_exists($key, $this->getEncryptableArray());
+    }
+
+    public function getEncryptableArray(): array
+    {
+        return collect($this->encryptable)
+            ->mapWithKeys(function ($value, $key) {
+                if (is_int($key)) {
+                    return [$value => null];
+                }
+                return [$key => $value];
+            })
+            ->toArray();
+    }
+
+    /**
+     * Save hashable attribute
+     *
+     * @param string $key
+     * @param $value
+     * @return $this
+     */
+    public function setHashedAttribute(string $key, $value)
+    {
+        $this->attributes[$key] = dbHashValue($value);
+
+        return $this;
+    }
+
+    /**
      * Save encryptable attribute
      *
      * @param string $key
@@ -93,17 +119,39 @@ trait EncryptableFields
     }
 
     /**
-     * Save hashable attribute
+     * A scope to search for encrypted values in the database
      *
-     * @param string $key
-     * @param $value
-     * @return $this
+     * @param Builder $query The QueryBuilder
+     * @param string $key The column name
+     * @param string $value The non-encrypted value to search for
+     * @return void
+     * @throws NotHashedFieldException
      */
-    public function setHashedAttribute(string $key, $value)
+    public function scopeWhereEncrypted(Builder $query, string $key, string $value): void
     {
-        $this->attributes[$key] = dbHashValue($value);
+        if (!$this->isHashable($key)) {
+            throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
+        }
 
-        return $this;
+        $query->where($this->getEncryptableArray()[$key], dbHashValue($value));
+    }
+
+    /**
+     * Convert the model's attributes to an array.
+     *
+     * @return array
+     */
+    public function attributesToArray()
+    {
+        $attributes = parent::attributesToArray();
+
+        foreach ($this->getEncryptableArray() as $key => $value) {
+            if (isset($attributes[$key])) {
+                $attributes[$key] = $this->getAttribute($key);
+            }
+        }
+
+        return $attributes;
     }
 
     /**
@@ -123,55 +171,27 @@ trait EncryptableFields
 
     public function getEncryptedAttribute(string $key)
     {
-        return empty($this->attributes[$key])
-            ? null
-            : app()->make(EncryptionInterface::class)->decrypt($this->attributes[$key]);
+        return empty($this->attributes[$key]) ? null : $this->getDecryptValue($key);
+    }
+
+    protected function getDecryptValue(string $key)
+    {
+        return app()->make(EncryptionInterface::class)->decrypt($this->attributes[$key]);
     }
 
     /**
-     * A scope to search for encrypted values in the database
-     * @param Builder $query The QueryBuilder
-     * @param string $key The column name
-     * @param string $value The non-encrypted value to search for
-     * @return void
-     * @throws NotHashedFieldException
-     */
-    public function scopeWhereEncrypted(Builder $query, string $key, string $value): void
-    {
-        if (!$this->isHashable($key)) {
-            throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
-        }
-
-        $query->where($this->getEncryptableArray()[$key], dbHashValue($value));
-    }
-
-    public function getEncryptableArray(): array
-    {
-        return collect($this->encryptable)
-            ->mapWithKeys(function ($value, $key) {
-                if (is_int($key)) {
-                    return [$value => null];
-                }
-                return [$key => $value];
-            })
-            ->toArray();
-    }
-
-    /**
-     * Convert the model's attributes to an array.
+     * Get the value of an "Attribute" return type marked attribute using its mutator.
      *
-     * @return array
+     * @param string $key
+     * @param mixed $value
+     * @return mixed
      */
-    public function attributesToArray()
+    protected function mutateAttributeMarkedAttribute($key, $value)
     {
-        $attributes = parent::attributesToArray();
-
-        foreach ($this->getEncryptableArray() as $key => $value) {
-            if (isset($attributes[$key])) {
-                $attributes[$key] = $this->getAttribute($key);
-            }
+        if (!array_key_exists($key, $this->attributeCastCache) && $this->isEncryptable($key)) {
+            $value = $this->getDecryptValue($key);
         }
 
-        return $attributes;
+        return parent::mutateAttributeMarkedAttribute($key, $value);
     }
 }
