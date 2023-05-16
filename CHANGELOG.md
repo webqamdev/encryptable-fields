@@ -2,6 +2,14 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 2.3.1 - 2023-05-16
+
+- Fix value decrypt when using new accessor syntax 
+
+## 2.3.0 - 2023-03-10
+
+- Laravel 10 compatibility
+
 ## 2.2.3 - 2023-01-27
 
 - Add parentheses to ternary operation
