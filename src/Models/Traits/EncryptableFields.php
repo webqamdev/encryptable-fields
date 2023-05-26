@@ -186,7 +186,7 @@ trait EncryptableFields
      * @param mixed $value
      * @return mixed
      */
-    protected function mutateAttributeMarkedAttribute(string $key, $value)
+    protected function mutateAttributeMarkedAttribute($key, $value)
     {
         if (
             !array_key_exists($key, $this->attributeCastCache)
