@@ -186,9 +186,13 @@ trait EncryptableFields
      * @param mixed $value
      * @return mixed
      */
-    protected function mutateAttributeMarkedAttribute($key, $value)
+    protected function mutateAttributeMarkedAttribute(string $key, $value)
     {
-        if (!array_key_exists($key, $this->attributeCastCache) && $this->isEncryptable($key)) {
+        if (
+            !array_key_exists($key, $this->attributeCastCache)
+            && $this->isEncryptable($key)
+            && !empty($this->attributes[$key])
+        ) {
             $value = $this->getDecryptValue($key);
         }
 
