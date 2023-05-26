@@ -2,6 +2,10 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 2.3.3 - 2023-05-26
+
+- Fix type hinting 
+
 ## 2.3.2 - 2023-05-26
 
 - Fix value decrypt when null 
