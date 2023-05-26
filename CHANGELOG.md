@@ -2,6 +2,10 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 2.3.2 - 2023-05-26
+
+- Fix value decrypt when null 
+
 ## 2.3.1 - 2023-05-16
 
 - Fix value decrypt when using new accessor syntax 
