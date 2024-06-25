@@ -2,6 +2,10 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 2.4.0 - 2024-06-25
+
+- Laravel 11 compatibility
+
 ## 2.3.3 - 2023-05-26
 
 - Fix type hinting 
