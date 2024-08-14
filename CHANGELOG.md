@@ -2,6 +2,9 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 3.0.0 - 2024-08-14
+- Laravel 11 hash compatibility (missing key parameter)
+
 ## 2.4.0 - 2024-06-25
 
 - Laravel 11 compatibility
