@@ -4,6 +4,17 @@
 
 ## 3.x to 4.x
 
+### Models
+
+#### Added `Encryptable` interface
+**Likelihood Of Impact: High**
+
+The `Webqamdev\EncryptableFields\Models\Traits\EncryptableFields` trait now requires the
+`Webqamdev\EncryptableFields\Models\Interfaces\Encryptable` interface to be implemented by the model.
+
+If your application or package defines a class that implements this trait, you may want to update your code to
+implement the new interface.
+
 ### Scopes
 
 #### `whereEncrypted` and `whereHashed` scopes
