@@ -6,6 +6,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
+use Webqamdev\EncryptableFields\Support\DB;
 
 /**
  * Trait EncryptedTrait
@@ -165,6 +166,56 @@ trait EncryptableFields
     {
         $query->whereNot(function ($query) use ($key, $value) {
             $this->scopeWhereHashed($query, $key, $value);
+        });
+    }
+
+    /**
+     * A scope to search for encrypted values in the database
+     *
+     * @param Builder $query The QueryBuilder
+     * @param string $key The column name
+     * @param string $value The non-encrypted value to search for
+     * @return void
+     * @throws NotHashedFieldException
+     */
+    public function scopeWhereEncrypted(Builder $query, string $key, string $value): void
+    {
+        if (!$this->isEncryptable($key)) {
+            throw new NotHashedFieldException(sprintf('%s is not encryptable', $key));
+        }
+
+        $query->where(DB::getRawClause($key), $value);
+    }
+
+    /**
+     * A scope to search for encrypted values in the database
+     *
+     * @param Builder $query The QueryBuilder
+     * @param string $key The column name
+     * @param string $value The non-encrypted value to search for
+     * @return void
+     * @throws NotHashedFieldException
+     */
+    public function scopeOrWhereEncrypted(Builder $query, string $key, string $value): void
+    {
+        $query->orWhere(function ($query) use ($key, $value) {
+            $this->scopeWhereEncrypted($query, $key, $value);
+        });
+    }
+
+    /**
+     * A scope to search for encrypted values not in the database
+     *
+     * @param Builder $query The QueryBuilder
+     * @param string $key The column name
+     * @param string $value The non-encrypted value to search for
+     * @return void
+     * @throws NotHashedFieldException
+     */
+    public function scopeWhereNotEncrypted(Builder $query, string $key, string $value): void
+    {
+        $query->whereNot(function ($query) use ($key, $value) {
+            $this->scopeWhereEncrypted($query, $key, $value);
         });
     }
 
