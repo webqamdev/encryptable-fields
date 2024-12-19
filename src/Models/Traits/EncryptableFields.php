@@ -30,7 +30,7 @@ trait EncryptableFields
      * @return mixed
      * @throws BindingResolutionException
      */
-    public function setAttribute($key, $value)
+    public function setAttribute($key, $value): mixed
     {
         $hasSetMutator = $this->hasSetMutator($key);
 
@@ -99,7 +99,7 @@ trait EncryptableFields
      * @param $value
      * @return $this
      */
-    public function setHashedAttribute(string $key, $value)
+    public function setHashedAttribute(string $key, $value): self
     {
         $this->attributes[$key] = dbHashValue($value);
 
@@ -114,7 +114,7 @@ trait EncryptableFields
      * @return $this
      * @throws BindingResolutionException
      */
-    public function setEncryptedAttribute(string $key, $value)
+    public function setEncryptedAttribute(string $key, $value): self
     {
         $this->attributes[$key] = app()->make(EncryptionInterface::class)->encrypt($value);
 
@@ -231,7 +231,7 @@ trait EncryptableFields
      *
      * @return array
      */
-    public function attributesToArray()
+    public function attributesToArray(): array
     {
         $attributes = parent::attributesToArray();
 
@@ -250,7 +250,7 @@ trait EncryptableFields
      * @param string $key
      * @return mixed
      */
-    protected function getAttributeFromArray($key)
+    protected function getAttributeFromArray($key): mixed
     {
         if ($this->isEncryptable($key)) {
             return $this->getEncryptedAttribute($key);
@@ -259,12 +259,12 @@ trait EncryptableFields
         return parent::getAttributeFromArray($key);
     }
 
-    public function getEncryptedAttribute(string $key)
+    public function getEncryptedAttribute(string $key): mixed
     {
         return empty($this->attributes[$key]) ? null : $this->getDecryptValue($key);
     }
 
-    protected function getDecryptValue(string $key)
+    protected function getDecryptValue(string $key): mixed
     {
         return app()->make(EncryptionInterface::class)->decrypt($this->attributes[$key]);
     }
@@ -276,7 +276,7 @@ trait EncryptableFields
      * @param mixed $value
      * @return mixed
      */
-    protected function mutateAttributeMarkedAttribute($key, $value)
+    protected function mutateAttributeMarkedAttribute($key, $value): mixed
     {
         if (
             !array_key_exists($key, $this->attributeCastCache)
