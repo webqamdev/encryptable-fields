@@ -119,7 +119,7 @@ trait EncryptableFields
     }
 
     /**
-     * A scope to search for encrypted values in the database
+     * A scope to search for hashed values in the database
      *
      * @param Builder $query The QueryBuilder
      * @param string $key The column name
@@ -127,7 +127,7 @@ trait EncryptableFields
      * @return void
      * @throws NotHashedFieldException
      */
-    public function scopeWhereEncrypted(Builder $query, string $key, string $value): void
+    public function scopeWhereHashed(Builder $query, string $key, string $value): void
     {
         if (!$this->isHashable($key)) {
             throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
