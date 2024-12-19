@@ -4,6 +4,7 @@ namespace Webqamdev\EncryptableFields\Models\Traits;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
+use Webqamdev\EncryptableFields\Exceptions\NotEncryptedFieldException;
 use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 use Webqamdev\EncryptableFields\Support\DB;
@@ -176,12 +177,12 @@ trait EncryptableFields
      * @param string $key The column name
      * @param string $value The non-encrypted value to search for
      * @return void
-     * @throws NotHashedFieldException
+     * @throws NotEncryptedFieldException
      */
     public function scopeWhereEncrypted(Builder $query, string $key, string $value): void
     {
         if (!$this->isEncryptable($key)) {
-            throw new NotHashedFieldException(sprintf('%s is not encryptable', $key));
+            throw new NotEncryptedFieldException(sprintf('%s is not encryptable', $key));
         }
 
         $query->where(DB::getRawClause($key), $value);
@@ -194,7 +195,7 @@ trait EncryptableFields
      * @param string $key The column name
      * @param string $value The non-encrypted value to search for
      * @return void
-     * @throws NotHashedFieldException
+     * @throws NotEncryptedFieldException
      */
     public function scopeOrWhereEncrypted(Builder $query, string $key, string $value): void
     {
@@ -210,7 +211,7 @@ trait EncryptableFields
      * @param string $key The column name
      * @param string $value The non-encrypted value to search for
      * @return void
-     * @throws NotHashedFieldException
+     * @throws NotEncryptedFieldException
      */
     public function scopeWhereNotEncrypted(Builder $query, string $key, string $value): void
     {
