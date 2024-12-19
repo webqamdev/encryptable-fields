@@ -2,6 +2,18 @@
 
 namespace Webqamdev\EncryptableFields\Models\Interfaces;
 
+use Illuminate\Database\Eloquent\Builder;
+
+/**
+ * Interface Encryptable
+ *
+ * @method static Builder whereHashed(string $key, mixed $value)
+ * @method static Builder whereOrHashed(string $key, mixed $value)
+ * @method static Builder whereHashedNot(string $key, mixed $value)
+ * @method static Builder whereEncrypted(string $key, mixed $value)
+ * @method static Builder whereOrEncrypted(string $key, mixed $value)
+ * @method static Builder whereEncryptedNot(string $key, mixed $value)
+ */
 interface Encryptable
 {
     public function isHashable(string $key): bool;
