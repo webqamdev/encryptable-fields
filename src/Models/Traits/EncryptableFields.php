@@ -164,7 +164,7 @@ trait EncryptableFields
      * @return void
      * @throws NotHashedFieldException
      */
-    public function scopeWhereNotHashed(Builder $query, string $key, string $value): void
+    public function scopeWhereHashedNot(Builder $query, string $key, string $value): void
     {
         $query->whereNot(function ($query) use ($key, $value) {
             $this->scopeWhereHashed($query, $key, $value);
@@ -219,7 +219,7 @@ trait EncryptableFields
      * @return void
      * @throws NotEncryptedFieldException
      */
-    public function scopeWhereNotEncrypted(Builder $query, string $key, string $value): void
+    public function scopeWhereEncryptedNot(Builder $query, string $key, string $value): void
     {
         $query->whereNot(function ($query) use ($key, $value) {
             $this->scopeWhereEncrypted($query, $key, $value);
