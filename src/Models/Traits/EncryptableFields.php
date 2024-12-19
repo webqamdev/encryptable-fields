@@ -21,6 +21,13 @@ use Webqamdev\EncryptableFields\Support\DB;
  *
  * @method bool hasGetMutator(string $key)
  * @method bool hasSetMutator(string $key)
+ *
+ * @method static Builder whereHashed(string $key, mixed $value)
+ * @method static Builder whereOrHashed(string $key, mixed $value)
+ * @method static Builder whereHashedNot(string $key, mixed $value)
+ * @method static Builder whereEncrypted(string $key, mixed $value)
+ * @method static Builder whereOrEncrypted(string $key, mixed $value)
+ * @method static Builder whereEncryptedNot(string $key, mixed $value)
  */
 trait EncryptableFields
 {
