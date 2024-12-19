@@ -20,3 +20,13 @@ The `Webqamdev\EncryptableFields\Models\Traits\EncryptableFields` trait has rece
 
 If your application or package defines a class that implements this trait, you may want to update your code to use
 the new scopes.
+
+## 2.x to 3.x
+
+### Updating Dependencies
+
+#### Updated Laravel version requirement
+**Likelihood Of Impact: High**
+
+Minimum Laravel version has been updated to `^10.0`. Update your `composer.json` file to require `laravel/framework`
+version `^10.0` or higher. Laravel's upgrade guide can be found [here](https://laravel.com/docs/10.x/upgrade).
