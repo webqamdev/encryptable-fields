@@ -22,7 +22,8 @@ php artisan vendor:publish --provider="Webqamdev\EncryptableFields\EncryptableFi
 ## Usage
 
 To work with this package, you need to use our `EncryptableFields` trait in your models, then override
-the `$encryptable` property. This array allows you to define encryptable attributes in your model.
+the `$encryptable` property. This array allows you to define encryptable attributes in your model. To use this trait,
+you also need to implement the `Encryptable` interface.
 
 You can also add attributes to contain a hash of the non encrypted value, which might be useful in order to execute a
 fast full match for a given searched value.
@@ -36,9 +37,10 @@ associated hashed attributes are values.
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Webqamdev\EncryptableFields\Models\Interfaces\Encryptable;
 use Webqamdev\EncryptableFields\Models\Traits\EncryptableFields;
 
-class User extends Model
+class User extends Model implements Encryptable
 {
     use EncryptableFields;
 
