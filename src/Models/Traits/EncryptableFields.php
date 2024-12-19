@@ -4,8 +4,10 @@ namespace Webqamdev\EncryptableFields\Models\Traits;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
+use Webqamdev\EncryptableFields\Exceptions\MissingEncryptableInterfaceException;
 use Webqamdev\EncryptableFields\Exceptions\NotEncryptedFieldException;
 use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
+use Webqamdev\EncryptableFields\Models\Interfaces\Encryptable;
 use Webqamdev\EncryptableFields\Services\DatabaseEncryption;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 use Webqamdev\EncryptableFields\Support\DB;
@@ -22,6 +24,15 @@ use Webqamdev\EncryptableFields\Support\DB;
  */
 trait EncryptableFields
 {
+    protected static function bootEncryptableFields()
+    {
+        if (!is_a(static::class, Encryptable::class, true)) {
+            throw new MissingEncryptableInterfaceException(
+                sprintf('%s must implement %s', static::class, Encryptable::class),
+            );
+        }
+    }
+
     /**
      * Set a given attribute on the model.
      *
