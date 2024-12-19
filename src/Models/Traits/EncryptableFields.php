@@ -137,6 +137,38 @@ trait EncryptableFields
     }
 
     /**
+     * A scope to search for hashed values in the database
+     *
+     * @param Builder $query The QueryBuilder
+     * @param string $key The column name
+     * @param string $value The non-encrypted value to search for
+     * @return void
+     * @throws NotHashedFieldException
+     */
+    public function scopeOrWhereHashed(Builder $query, string $key, string $value): void
+    {
+        $query->orWhere(function ($query) use ($key, $value) {
+            $this->scopeWhereHashed($query, $key, $value);
+        });
+    }
+
+    /**
+     * A scope to search for hashed values not in the database
+     *
+     * @param Builder $query The QueryBuilder
+     * @param string $key The column name
+     * @param string $value The non-encrypted value to search for
+     * @return void
+     * @throws NotHashedFieldException
+     */
+    public function scopeWhereNotHashed(Builder $query, string $key, string $value): void
+    {
+        $query->whereNot(function ($query) use ($key, $value) {
+            $this->scopeWhereHashed($query, $key, $value);
+        });
+    }
+
+    /**
      * Convert the model's attributes to an array.
      *
      * @return array
