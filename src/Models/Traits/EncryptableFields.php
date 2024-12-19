@@ -6,6 +6,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Webqamdev\EncryptableFields\Exceptions\NotEncryptedFieldException;
 use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
+use Webqamdev\EncryptableFields\Services\DatabaseEncryption;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 use Webqamdev\EncryptableFields\Support\DB;
 
@@ -181,6 +182,11 @@ trait EncryptableFields
      */
     public function scopeWhereEncrypted(Builder $query, string $key, string $value): void
     {
+        if (!app(EncryptionInterface::class) instanceof DatabaseEncryption) {
+            $this->scopeWhereHashed($query, $key, $value);
+            return;
+        }
+
         if (!$this->isEncryptable($key)) {
             throw new NotEncryptedFieldException(sprintf('%s is not encryptable', $key));
         }
