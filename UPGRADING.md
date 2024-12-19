@@ -6,11 +6,15 @@
 
 ### Scopes
 
-#### Renamed `whereEncrypted` to `whereHashed`
-**Likelihood Of Impact: High**
+#### `whereEncrypted` and `whereHashed` scopes
+**Likelihood Of Impact: Low**
 
 The scope `whereEncrypted` has been renamed to `whereHashed` to better reflect the underlying functionality.
 The scope still works the same way, but the you must update your code to use the new scope.
+
+A new scope `whereEncrypted` has been added to the trait. This scope now check the encrypted value of the field instead
+of the hashed value. It also falls back to the hashed value if the encryption service is not
+`Webqamdev\EncryptableFields\Services\DatabaseEncryption`.
 
 #### Added `orWhere` and `whereNot` scopes
 **Likelihood Of Impact: Low**
