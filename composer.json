@@ -21,7 +21,7 @@
         "php": "^8.2",
         "ext-openssl": "*",
         "ext-json": "*",
-        "illuminate/support": "^11.0"
+        "illuminate/support": "^11.0|^12.0"
     },
     "require-dev": {
         "orchestra/testbench": "^9.1.5",
