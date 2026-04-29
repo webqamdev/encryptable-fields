@@ -10,7 +10,7 @@ class DB
     public static function getClause(string $column): string
     {
         return sprintf(
-            'convert(aes_decrypt(from_base64(json_value(from_base64(%s), \'$.value\')), \'%s\') USING utf8mb4)',
+            'convert(aes_decrypt(from_base64(json_value(convert(from_base64(%s) using utf8mb4), \'$.value\')), \'%s\') USING utf8mb4)',
             sprintf('`%s`', str_replace('.', '`.`', $column)),
             app()->get('databaseEncrypter')->getKey()
         );
