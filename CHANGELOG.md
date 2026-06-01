@@ -2,6 +2,10 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## 3.1.1 - 2026-04-29
+
+- Fix UTF-8MB4 conversion in JSON value decryption for database queries
+
 ## 3.1.0 - 2025-08-13
 - Laravel 12 compatibility
 
