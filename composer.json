@@ -21,11 +21,11 @@
         "php": "^8.2",
         "ext-openssl": "*",
         "ext-json": "*",
-        "illuminate/support": "^11.0|^12.0"
+        "illuminate/support": "^11.0|^12.0|^13.0"
     },
     "require-dev": {
         "orchestra/testbench": "^9.1.5",
-        "phpunit/phpunit": "^10.5|^11.0"
+        "phpunit/phpunit": "^10.5|^11.0|^12.0"
     },
     "autoload": {
         "psr-4": {
