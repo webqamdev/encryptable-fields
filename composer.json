@@ -24,7 +24,6 @@
     ],
     "require": {
         "php": "^8.3",
-        "ext-json": "*",
         "ext-openssl": "*",
         "laravel/framework": "^13.0"
     },
