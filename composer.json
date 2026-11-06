@@ -24,9 +24,9 @@
     ],
     "require": {
         "php": "^8.3",
-        "ext-openssl": "*",
         "ext-json": "*",
-        "illuminate/support": "^13.0"
+        "ext-openssl": "*",
+        "laravel/framework": "^13.0"
     },
     "require-dev": {
         "larastan/larastan": "^3.14",
