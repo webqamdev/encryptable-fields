@@ -19,25 +19,15 @@ class DatabasePresenceVerifier extends BaseDatabasePresenceVerifier
      */
     public function getCount($collection, $column, $value, $excludeId = null, $idColumn = null, array $extra = []): int
     {
-        $query = $this->table($collection);
-
-        if (empty($extra['is_encrypted'])) {
-            if (! empty($extra['is_hashed'])) {
-                $value = dbHashValue($value);
-                unset($extra['is_hashed']);
-            }
-
-            $query->where($column, '=', $value);
-        } else {
-            $query->where(new Expression($column), '=', $value);
-            unset($extra['is_encrypted']);
+        if (! empty($extra['is_encrypted'])) {
+            $column = new Expression($column);
+        } elseif (! empty($extra['is_hashed'])) {
+            $value = dbHashValue((string) $value);
         }
 
-        if (! is_null($excludeId) && $excludeId !== 'NULL') {
-            $query->where($idColumn ?: 'id', '<>', $excludeId);
-        }
+        unset($extra['is_encrypted'], $extra['is_hashed']);
 
-        return $this->addConditions($query, $extra)->count();
+        return parent::getCount($collection, $column, $value, $excludeId, $idColumn, $extra);
     }
 
     /**
@@ -52,16 +42,14 @@ class DatabasePresenceVerifier extends BaseDatabasePresenceVerifier
     {
         if (! empty($extra['is_hashed'])) {
             $values = array_map(fn (mixed $value): string => dbHashValue((string) $value), $values);
-            unset($extra['is_hashed']);
         }
 
         if (! empty($extra['is_encrypted'])) {
             $column = new Expression($column);
-            unset($extra['is_encrypted']);
         }
 
-        $query = $this->table($collection)->whereIn($column, $values);
+        unset($extra['is_encrypted'], $extra['is_hashed']);
 
-        return $this->addConditions($query, $extra)->distinct()->count($column);
+        return parent::getMultiCount($collection, $column, $values, $extra);
     }
 }
