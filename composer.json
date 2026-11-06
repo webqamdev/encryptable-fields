@@ -1,6 +1,6 @@
 {
     "name": "webqamdev/encryptable-fields",
-    "description": "Laravel Backpack Fields Encryptable",
+    "description": "Laravel Eloquent Fields Encryptable",
     "keywords": [
         "webqamdev",
         "webqamdeveloppement",
@@ -29,8 +29,11 @@
         "illuminate/support": "^13.0"
     },
     "require-dev": {
+        "larastan/larastan": "^3.14",
+        "laravel/pint": "^1.32",
         "orchestra/testbench": "^11.0",
-        "phpunit/phpunit": "^12.0"
+        "phpunit/phpunit": "^12.0",
+        "rector/rector": "^2.8"
     },
     "autoload": {
         "psr-4": {
@@ -47,7 +50,10 @@
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
-        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+        "format": "vendor/bin/pint",
+        "refactor": "vendor/bin/rector",
+        "analyse": "vendor/bin/phpstan analyse"
     },
     "config": {
         "sort-packages": true
