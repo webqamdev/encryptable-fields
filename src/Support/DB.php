@@ -5,6 +5,7 @@ namespace Webqamdev\EncryptableFields\Support;
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Expression as RawExpression;
+use Illuminate\Database\Query\Grammars\Grammar;
 use PDO;
 use WeakMap;
 use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
@@ -22,12 +23,14 @@ class DB
     /** @var WeakMap<PDO, true>|null */
     private static ?WeakMap $initializedPdos = null;
 
-    public static function getClause(string $column): string
+    /**
+     * @param  Grammar|null  $grammar  Wraps the column with the table prefix, default connection one when null
+     */
+    public static function getClause(string $column, ?Grammar $grammar = null): string
     {
-        $payload = sprintf(
-            'convert(from_base64(%s) using utf8mb4)',
-            sprintf('`%s`', str_replace('.', '`.`', $column)),
-        );
+        $grammar ??= app('db')->connection()->getQueryGrammar();
+
+        $payload = sprintf('convert(from_base64(%s) using utf8mb4)', $grammar->wrap($column));
 
         $arguments = sprintf("from_base64(json_value(%s, '$.value')), %s", $payload, self::KEY_VARIABLE);
 
@@ -38,9 +41,9 @@ class DB
         return sprintf('convert(aes_decrypt(%s) USING utf8mb4)', $arguments);
     }
 
-    public static function getRawClause(string $column): Expression
+    public static function getRawClause(string $column, ?Grammar $grammar = null): Expression
     {
-        return new RawExpression(self::getClause($column));
+        return new RawExpression(self::getClause($column, $grammar));
     }
 
     /**

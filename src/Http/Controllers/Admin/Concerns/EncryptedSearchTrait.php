@@ -20,7 +20,7 @@ trait EncryptedSearchTrait
     {
         foreach (Arr::wrap($columns) as $column) {
             $query->orWhere(
-                DB::getRawClause($column),
+                DB::getRawClause($column, $query->getQuery()->getGrammar()),
                 'like',
                 '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $searchTerm).'%',
             );
@@ -40,7 +40,7 @@ trait EncryptedSearchTrait
     {
         foreach (Arr::wrap($columns) as $column) {
             $query->orderBy(
-                DB::getRawClause($column),
+                DB::getRawClause($column, $query->getQuery()->getGrammar()),
                 $columnDirection,
             );
         }
