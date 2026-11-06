@@ -4,6 +4,7 @@ namespace Webqamdev\EncryptableFields\Providers;
 
 use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Encryption\EncryptionServiceProvider as BaseEncryptionServiceProvider;
+use Illuminate\Encryption\MissingAppKeyException;
 use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
 use Webqamdev\EncryptableFields\Support\DB;
 
@@ -39,5 +40,19 @@ class DatabaseEncryptionServiceProvider extends BaseEncryptionServiceProvider
 
             return new DatabaseEncrypter($this->parseKey($config), $config['cipher']);
         });
+    }
+
+    /**
+     * @param  array<string, mixed>  $config
+     *
+     * @throws MissingAppKeyException
+     */
+    protected function key(array $config): string
+    {
+        if (empty($config['key'])) {
+            throw new MissingAppKeyException('No database encryption key has been specified (APP_DB_ENCRYPTION_KEY).');
+        }
+
+        return $config['key'];
     }
 }
