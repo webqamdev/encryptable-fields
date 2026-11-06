@@ -12,8 +12,13 @@
     "type": "library",
     "authors": [
         {
-            "name": "Thomas Combe",
-            "email": "thomascombe42@gmail.com",
+            "name": "Jérémy ARGOUD",
+            "email": "jargoud@webqam.fr",
+            "role": "Developer"
+        },
+        {
+            "name": "Robin DESORME",
+            "email": "rdesorme@webqam.fr",
             "role": "Developer"
         }
     ],
