@@ -56,10 +56,10 @@ Skip this step if you use the default `Encryption` service.
 1. Copy your current `APP_DB_ENCRYPTION_KEY` value to a new `APP_DB_ENCRYPTION_LEGACY_KEY` variable.
 2. Choose your cipher, according to your database server version:
 
-   | `APP_DB_ENCRYPTION_CIPHER` | Requires                      |
-   |----------------------------|-------------------------------|
-   | `aes-128-ecb` (default)    | MySQL 5.6+ / MariaDB 10.x+    |
-   | `aes-256-cbc`              | MySQL 5.6.17+ / MariaDB 11.2+ |
+   | `APP_DB_ENCRYPTION_CIPHER` | Requires                        |
+   |----------------------------|---------------------------------|
+   | `aes-128-ecb` (default)    | MySQL 8.0.21+ / MariaDB 10.2.3+ |
+   | `aes-256-cbc`              | MySQL 8.0.21+ / MariaDB 11.2+   |
 
    `aes-128-ecb` gives identical encrypted values for identical values: prefer `aes-256-cbc` when available.
 3. Generate a new key:

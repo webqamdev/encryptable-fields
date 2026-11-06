@@ -8,8 +8,8 @@ return [
     'key' => env('APP_DB_ENCRYPTION_KEY'),
 
     // Database encryption cipher, must be supported by your database server:
-    // - aes-128-ecb (DatabaseEncrypter::CIPHER_AES_128_ECB): MySQL 5.6+ / MariaDB 10.x+ (identical values give identical ciphertexts)
-    // - aes-256-cbc (DatabaseEncrypter::CIPHER_AES_256_CBC): MySQL 5.6.17+ / MariaDB 11.2+ (random IV, recommended when available)
+    // - aes-128-ecb (DatabaseEncrypter::CIPHER_AES_128_ECB): MySQL 8.0.21+ / MariaDB 10.2.3+ (identical values give identical ciphertexts)
+    // - aes-256-cbc (DatabaseEncrypter::CIPHER_AES_256_CBC): MySQL 8.0.21+ / MariaDB 11.2+ (random IV, recommended when available)
     'cipher' => env('APP_DB_ENCRYPTION_CIPHER', DatabaseEncrypter::CIPHER_AES_128_ECB),
 
     // Need to implement EncryptionInterface

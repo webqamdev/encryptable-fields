@@ -11,7 +11,7 @@ Upgrading from v3? Read the [upgrade guide](UPGRADE.md).
 
 - PHP 8.3+
 - Laravel 13
-- For [searchable encrypted values](#searchable-encrypted-values): MySQL 5.6+ or MariaDB 10.x+ (see
+- For [searchable encrypted values](#searchable-encrypted-values): MySQL 8.0.21+ or MariaDB 10.2.3+ (see
   [cipher choice](#cipher-choice))
 
 ## Installation
@@ -155,10 +155,10 @@ Values are then encrypted with a dedicated key and a cipher supported by your da
 
 #### Cipher choice
 
-| `APP_DB_ENCRYPTION_CIPHER` | Key size | Requires                      | Identical values                   |
-|----------------------------|----------|-------------------------------|------------------------------------|
-| `aes-128-ecb` (default)    | 128 bits | MySQL 5.6+ / MariaDB 10.x+    | ⚠️ give identical encrypted values |
-| `aes-256-cbc`              | 256 bits | MySQL 5.6.17+ / MariaDB 11.2+ | give different encrypted values    |
+| `APP_DB_ENCRYPTION_CIPHER` | Key size | Requires                        | Identical values                   |
+|----------------------------|----------|---------------------------------|------------------------------------|
+| `aes-128-ecb` (default)    | 128 bits | MySQL 8.0.21+ / MariaDB 10.2.3+ | ⚠️ give identical encrypted values |
+| `aes-256-cbc`              | 256 bits | MySQL 8.0.21+ / MariaDB 11.2+   | give different encrypted values    |
 
 ⚠️ With `aes-128-ecb`, anyone reading the database can tell which rows share the same value (and how many), without
 decrypting them. Use `aes-256-cbc` as soon as your database server supports it. Changing the cipher requires a new key
