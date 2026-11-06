@@ -2,6 +2,8 @@
 
 namespace Webqamdev\EncryptableFields\Tests\Models;
 
+use Illuminate\Auth\Authenticatable as AuthenticatableTrait;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Webqamdev\EncryptableFields\Models\Concerns\EncryptableFields;
@@ -12,8 +14,9 @@ use Webqamdev\EncryptableFields\Models\Concerns\EncryptableFields;
  * @property ?string $email
  * @property ?string $nickname
  */
-class User extends Model
+class User extends Model implements Authenticatable
 {
+    use AuthenticatableTrait;
     use EncryptableFields;
 
     public $timestamps = false;
