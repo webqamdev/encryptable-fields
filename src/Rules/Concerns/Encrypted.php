@@ -10,7 +10,13 @@ trait Encrypted
     {
         parent::__construct($table, $column);
 
-        $this->column = sprintf('"%s"', DB::getClause($column));
+        // Same connection resolution as the validator: "connection.table"
+        $connection = str_contains($this->table, '.') ? strstr($this->table, '.', true) : null;
+
+        $this->column = sprintf(
+            '"%s"',
+            DB::getClause($column, app('db')->connection($connection)->getQueryGrammar()),
+        );
     }
 
     /**
