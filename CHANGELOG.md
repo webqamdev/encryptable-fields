@@ -2,6 +2,26 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## [4.0.0](https://github.com/webqamdev/encryptable-fields/compare/3.2.0...master) - Unreleased
+
+Breaking changes, see [UPGRADE.md](UPGRADE.md).
+
+- Require PHP 8.3+ and Laravel 13
+- Hash values with HMAC-SHA256 and a dedicated `APP_DB_HASH_KEY` instead of a salted SHA-1 (`hash_salt` config removed)
+- Use the full database encryption key (128 bits instead of 64 bits) instead of a truncated SHA-512 of it
+- Add `aes-256-cbc` database cipher (`APP_DB_ENCRYPTION_CIPHER`), for MySQL 5.6.17+ / MariaDB 11.2+
+- Keep the database encryption key out of SQL statements, query log and exceptions (MySQL session variable)
+- Replace `EncryptableFields` trait attribute overrides with an Eloquent cast (`Casts\Encrypted`)
+- Fix `'0'` being stored as `null`
+- Fix `DatabaseEncrypter` not serializing falsy values
+- Add `encryptable-fields:key-generate --hash` option
+- Add `encryptable-fields:migrate-legacy` command to migrate v3 data
+- Move traits from `Traits` to `Concerns` namespaces
+- Ask for confirmation before `encryptable-fields:key-generate` overwrites an existing key
+- Fix `encryptable-fields:key-generate` reporting success when the `.env` value differs from the loaded key
+- Fix `Hashed` rules ignoring the `$addHashSuffixIfNeeded` argument
+- Add Laravel Pint, Rector and Larastan, modernize code
+
 ## [3.2.0](https://github.com/webqamdev/encryptable-fields/compare/3.1.1...3.2.0) - 2026-06-01
 
 - Laravel 13 compatibility

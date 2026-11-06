@@ -5,6 +5,15 @@
 
 Allow you to encrypt model's fields. You can add a hashed field to allow SQL query.
 
+Upgrading from v3? Read the [upgrade guide](UPGRADE.md).
+
+## Requirements
+
+- PHP 8.3+
+- Laravel 13
+- For [searchable encrypted values](#searchable-encrypted-values): MySQL 5.6+ or MariaDB 10.x+ (see
+  [cipher choice](#cipher-choice))
+
 ## Installation
 
 You can install the package via composer:
@@ -19,10 +28,29 @@ You can publish the configuration via Artisan:
 php artisan vendor:publish --provider="Webqamdev\EncryptableFields\EncryptableFieldsServiceProvider"
 ```
 
+Hashed attributes are HMAC-SHA256 hashes. Add the following variable to your `.env` file:
+
+```
+APP_DB_HASH_KEY=
+```
+
+then generate the hash key:
+
+```bash
+php artisan encryptable-fields:key-generate --hash
+```
+
+⚠️ Changing this key invalidates every stored hash. Keep it secret and backed up, like `APP_KEY`.
+
+When a key is already set, `encryptable-fields:key-generate` asks for confirmation before overwriting it (the answer
+defaults to no in non-interactive mode). Use `--force` to skip the confirmation, or `--show` to display a key without
+writing it.
+
 ## Usage
 
 To work with this package, you need to use our `EncryptableFields` trait in your models, then override
-the `$encryptable` property. This array allows you to define encryptable attributes in your model.
+the `$encryptable` property. This array allows you to define encryptable attributes in your model. The trait registers
+an Eloquent [cast](./src/Casts/Encrypted.php) for each of them.
 
 You can also add attributes to contain a hash of the non encrypted value, which might be useful in order to execute a
 fast full match for a given searched value.
@@ -36,7 +64,7 @@ associated hashed attributes are values.
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Webqamdev\EncryptableFields\Models\Traits\EncryptableFields;
+use Webqamdev\EncryptableFields\Models\Concerns\EncryptableFields;
 
 class User extends Model
 {
@@ -58,6 +86,14 @@ class User extends Model
         self::COLUMN_LASTNAME => self::COLUMN_LASTNAME_HASH,
         self::COLUMN_EMAIL,
     ];
+}
+```
+
+Hash columns store a 64 characters hexadecimal string:
+
+```php
+$table->text('firstname')->nullable();
+$table->char('firstname_hash', 64)->nullable()->index();
 ```
 
 To create a new model, simply do it as before:
@@ -71,10 +107,16 @@ User::create(
 );
 ```
 
+`null` and empty strings are stored as `null`, in both encrypted and hash columns. Any other value, including `'0'`,
+is encrypted and hashed.
+
+Accessors defined on encrypted attributes (`getFirstnameAttribute()` or `firstname(): Attribute`) receive the
+decrypted value.
+
 To find a model from a hashed value:
 
 ```php
-User::where(User::COLUMN_FIRSTNAME_HASH, User::hashValue('watson'))->first();
+User::where(User::COLUMN_FIRSTNAME_HASH, dbHashValue('watson'))->first();
 ```
 
 or use the model's local scope:
@@ -109,18 +151,37 @@ return [
 and [MariaDB](https://mariadb.com/kb/en/aes_decrypt/) both provide an `aes_decrypt` function, allowing to decrypt values
 directly when querying. It then becomes possible to use this function to filter or sort encrypted values.
 
-However, Laravel default encrypter only handles `AES-128-CBC` and `AES-256-CBC` cipher methods, where `MySQL`
-and `MariaDB` requires `AES-128-ECB`. We're going to use two different keys.
+Values are then encrypted with a dedicated key and a cipher supported by your database server.
 
-To do so, add the following variable to your `.env` file:
+#### Cipher choice
+
+| `APP_DB_ENCRYPTION_CIPHER` | Key size | Requires                      | Identical values                   |
+|----------------------------|----------|-------------------------------|------------------------------------|
+| `aes-128-ecb` (default)    | 128 bits | MySQL 5.6+ / MariaDB 10.x+    | ⚠️ give identical encrypted values |
+| `aes-256-cbc`              | 256 bits | MySQL 5.6.17+ / MariaDB 11.2+ | give different encrypted values    |
+
+⚠️ With `aes-128-ecb`, anyone reading the database can tell which rows share the same value (and how many), without
+decrypting them. Use `aes-256-cbc` as soon as your database server supports it. Changing the cipher requires a new key
+and re-encrypting existing values.
+
+#### Key
+
+Add the following variables to your `.env` file:
 
 ```
+APP_DB_ENCRYPTION_CIPHER=aes-128-ecb
 APP_DB_ENCRYPTION_KEY=
 ```
 
-and run `php artisan encryptable-fields:key-generate` command to generate a database encryption key.
+and run `php artisan encryptable-fields:key-generate` command to generate a database encryption key matching the
+cipher.
 
-⚠️ You shouldn't generate this key on your own because ciphers differ between Laravel and MySQL/MariaDB.
+⚠️ You shouldn't generate this key on your own because its size depends on the cipher.
+
+The key is never written in SQL statements: before the first query using it, the package stores it in a MySQL session
+variable (`@encryptable_fields_key`) with a prepared statement, outside of Laravel's query log, events and exceptions.
+Note that the database [general query log](https://dev.mysql.com/doc/refman/8.4/en/query-log.html), when enabled,
+still records it.
 
 Then, it is required to override Laravel's default encrypter, which is done
 in [DatabaseEncrypter.php](./src/Encryption/DatabaseEncrypter.php).
@@ -163,8 +224,17 @@ return [
 ⚠️ With [DatabaseEncrypter.php](./src/Encryption/DatabaseEncrypter.php), values are not serialized in order to allow
 querying with exact values (`=` instead of `like` operator), which means it won't handle object instances or arrays.
 
+To query decrypted values in your own code, use the clause returned by `Webqamdev\EncryptableFields\Support\DB`:
+
+```php
+use Webqamdev\EncryptableFields\Support\DB;
+
+User::whereRaw(DB::getClause('firstname') . ' = ?', ['watson'])->get();
+User::orderBy(DB::getRawClause('firstname'))->get();
+```
+
 If you're using [Laravel Backpack](https://backpackforlaravel.com) in your project, a
-trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Traits/EncryptedSearchTrait.php) provides methods to customize
+trait [EncryptedSearchTrait](./src/Http/Controllers/Admin/Concerns/EncryptedSearchTrait.php) provides methods to customize
 search and order logics.
 
 ```php
@@ -285,6 +355,22 @@ This trait print encrypted values in log instead of decrypt values.
 
 ``` bash
 composer test
+```
+
+Code is modernized with [Rector](https://getrector.com), formatted with [Laravel Pint](https://laravel.com/docs/pint)
+and analysed with [Larastan](https://github.com/larastan/larastan):
+
+``` bash
+composer refactor
+composer format
+composer analyse
+```
+
+Searchable encrypted values tests only run against MySQL or MariaDB:
+
+``` bash
+DB_CONNECTION=mysql DB_HOST=127.0.0.1 DB_DATABASE=testing DB_USERNAME=root DB_PASSWORD=secret \
+APP_DB_ENCRYPTION_CIPHER=aes-256-cbc composer test
 ```
 
 ### Changelog
