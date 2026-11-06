@@ -5,7 +5,6 @@ namespace Webqamdev\EncryptableFields\Console;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Foundation\Console\KeyGenerateCommand as BaseCommand;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 use Random\RandomException;
 use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
 
@@ -21,20 +20,22 @@ class KeyGenerateCommand extends BaseCommand
                     {--show : Display the key instead of modifying files}
                     {--force : Overwrite an existing key without confirmation}';
 
+    protected $description = 'Set the database encryption key (APP_DB_ENCRYPTION_KEY) or the hash key (APP_DB_HASH_KEY)';
+
     /**
      * Execute the console command.
      *
      * @throws RandomException
      * @throws FileNotFoundException
      */
-    public function handle(): void
+    public function handle(): int
     {
         if (! $this->hasEnvironmentVariable()) {
             $this->error(
                 sprintf('Missing environment variable. Please add %s= to your .env file.', $this->envVariableName()),
             );
 
-            return;
+            return self::FAILURE;
         }
 
         $key = $this->generateRandomKey();
@@ -42,19 +43,18 @@ class KeyGenerateCommand extends BaseCommand
         if ($this->option('show')) {
             $this->line('<comment>'.$key.'</comment>');
 
-            return;
+            return self::SUCCESS;
         }
 
-        // Next, we will replace the application key in the environment file so it is
-        // automatically setup for this developer. This key gets generated using a
-        // secure random byte generator and is later base64 encoded for storage.
         if (! $this->setKeyInEnvironmentFile($key)) {
-            return;
+            return self::SUCCESS;
         }
 
         $this->laravel['config'][$this->configKey()] = $key;
 
-        $this->info('Application key set successfully.');
+        $this->info(sprintf('%s set successfully.', $this->envVariableName()));
+
+        return self::SUCCESS;
     }
 
     protected function envVariableName(): string
@@ -72,16 +72,14 @@ class KeyGenerateCommand extends BaseCommand
      */
     protected function hasEnvironmentVariable(): bool
     {
-        return Str::contains(
-            File::get(
-                $this->laravel->environmentFilePath()
-            ),
+        return str_contains(
+            File::get($this->laravel->environmentFilePath()),
             $this->envVariableName().'=',
         );
     }
 
     /**
-     * Generate a random key for the application.
+     * Generate a random key, base64 encoded.
      *
      * @throws RandomException
      */
@@ -149,7 +147,7 @@ class KeyGenerateCommand extends BaseCommand
     }
 
     /**
-     * Get a regex pattern that will match env APP_KEY with any random key.
+     * Get a regex pattern matching the environment variable with its currently loaded value.
      */
     protected function keyReplacementPattern(): string
     {
