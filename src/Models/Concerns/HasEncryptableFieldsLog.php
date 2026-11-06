@@ -4,29 +4,32 @@ namespace Webqamdev\EncryptableFields\Models\Concerns;
 
 use Spatie\Activitylog\Models\Activity;
 
+/**
+ * Requires the EncryptableFields trait.
+ */
 trait HasEncryptableFieldsLog
 {
     public function tapActivity(Activity $activity, string $eventName): void
     {
-        if (method_exists($this, 'getEncryptableArray')) {
-            // Encryption is enabled
-            $activity->properties = $this->activityEncryptArray($activity->properties->toArray());
-        }
+        $activity->properties = $this->activityEncryptArray($activity->properties->toArray());
     }
 
-    protected function activityEncryptArray(array $properties): array
+    /**
+     * @param  array<array-key, mixed>  $properties
+     * @param  bool  $old  Whether the properties are the "old" values of the activity
+     * @return array<array-key, mixed>
+     */
+    protected function activityEncryptArray(array $properties, bool $old = false): array
     {
-        if (method_exists($this, 'getEncryptableArray')) {
-            $mappingEncryptableFields = $this->getEncryptableArray();
+        $mappingEncryptableFields = $this->getEncryptableArray();
 
-            foreach ($properties as $key => $value) {
-                if (is_array($value)) {
-                    // Recursive encrypt
-                    $properties[$key] = $this->activityEncryptArray($value);
-                } elseif (isset($mappingEncryptableFields[$key])) {
-                    // get value without use accessor (to get encrypted value)
-                    $properties[$key] = $this->attributes[$key];
-                }
+        foreach ($properties as $key => $value) {
+            if (is_array($value)) {
+                // Recursive encrypt
+                $properties[$key] = $this->activityEncryptArray($value, $old || $key === 'old');
+            } elseif (array_key_exists($key, $mappingEncryptableFields)) {
+                // Raw values, without accessor: original ones are not synced yet when the activity is logged
+                $properties[$key] = $old ? $this->getRawOriginal($key) : ($this->attributes[$key] ?? null);
             }
         }
 

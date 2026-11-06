@@ -14,7 +14,7 @@ parameters:
             path: config/config.php
         # Requires spatie/laravel-activitylog, not installed in this package
         -
-            identifier: trait.unused
+            identifier: class.notFound
             path: src/Models/Concerns/HasEncryptableFieldsLog.php
     # Same rules as PhpStorm "Unhandled exception" inspection
     exceptions:
