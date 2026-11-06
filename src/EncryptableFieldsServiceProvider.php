@@ -58,18 +58,7 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
             ->registerPresenceVerifier()
             ->mergeConfiguration()
             ->registerBindings()
-            ->registerCommands()
-            ->loadHelpers();
-    }
-
-    /**
-     * Load the Backpack helper methods, for convenience.
-     */
-    public function loadHelpers(): self
-    {
-        require_once __DIR__.'/helpers.php';
-
-        return $this;
+            ->registerCommands();
     }
 
     protected function registerCommands(): self
