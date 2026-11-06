@@ -54,7 +54,7 @@ class MigrateLegacyCommandTest extends TestCase
 
         $user = User::whereEncrypted('firstname', 'watson')->sole();
         $this->assertSame('watson', $user->firstname);
-        $this->assertSame('0', $user->getAttributes()['email'] === null ? null : app('databaseEncrypter')->decrypt($user->getAttributes()['email']));
+        $this->assertSame('0', $user->getAttributes()['email'] === null ? null : app(DatabaseEncrypter::class)->decrypt($user->getAttributes()['email']));
 
         // Second run skips already migrated values
         $this->artisan('encryptable-fields:migrate-legacy', ['models' => [User::class]])

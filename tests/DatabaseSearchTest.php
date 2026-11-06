@@ -5,6 +5,7 @@ namespace Webqamdev\EncryptableFields\Tests;
 use Illuminate\Support\Facades\DB as Facade;
 use Illuminate\Support\Facades\Validator;
 use ReflectionException;
+use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
 use Webqamdev\EncryptableFields\Http\Controllers\Admin\Concerns\EncryptedSearchTrait;
 use Webqamdev\EncryptableFields\Rules\Exists\Encrypted as ExistsEncrypted;
 use Webqamdev\EncryptableFields\Rules\Unique\Encrypted as UniqueEncrypted;
@@ -29,7 +30,7 @@ class DatabaseSearchTest extends TestCase
             $this->markTestSkipped('Requires a MySQL or MariaDB connection.');
         }
 
-        if (! app('databaseEncrypter')->isEcb() && $this->isMariaDbBelow112()) {
+        if (! app(DatabaseEncrypter::class)->isEcb() && $this->isMariaDbBelow112()) {
             $this->markTestSkipped('aes-256-cbc requires MariaDB 11.2+.');
         }
 
@@ -78,7 +79,7 @@ class DatabaseSearchTest extends TestCase
 
         User::query()->whereRaw(DB::getClause('firstname').' = ?', ['Holmes'])->first();
 
-        $key = base64_encode(app('databaseEncrypter')->getKey());
+        $key = base64_encode(app(DatabaseEncrypter::class)->getKey());
         foreach (Facade::getQueryLog() as $query) {
             $this->assertStringNotContainsString($key, $query['query'].json_encode($query['bindings']));
         }

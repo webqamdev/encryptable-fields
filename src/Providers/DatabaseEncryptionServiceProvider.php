@@ -40,8 +40,6 @@ class DatabaseEncryptionServiceProvider extends BaseEncryptionServiceProvider
 
             return new DatabaseEncrypter($this->parseKey($config), $config['cipher']);
         });
-
-        $this->app->alias(DatabaseEncrypter::class, 'databaseEncrypter');
     }
 
     /**

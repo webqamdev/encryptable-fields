@@ -17,6 +17,7 @@ Breaking changes, see [UPGRADE.md](UPGRADE.md).
 - Add `encryptable-fields:key-generate --hash` option
 - Add `encryptable-fields:migrate-legacy` command to migrate v3 data
 - Move traits from `Traits` to `Concerns` namespaces
+- Bind `DatabaseEncrypter` by class: `databaseEncrypter` container key removed
 - Ask for confirmation before `encryptable-fields:key-generate` overwrites an existing key
 - Fix `encryptable-fields:key-generate` reporting success when the `.env` value differs from the loaded key
 - Fix `Hashed` rules ignoring the `$addHashSuffixIfNeeded` argument
