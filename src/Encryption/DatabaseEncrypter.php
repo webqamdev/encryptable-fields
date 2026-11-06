@@ -5,6 +5,7 @@ namespace Webqamdev\EncryptableFields\Encryption;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Contracts\Encryption\EncryptException;
 use Illuminate\Encryption\Encrypter as BaseEncrypter;
+use JsonException;
 use Random\RandomException;
 use RuntimeException;
 use SensitiveParameter;
@@ -31,7 +32,7 @@ class DatabaseEncrypter extends BaseEncrypter
     public static function supported(#[SensitiveParameter] $key, $cipher): bool
     {
         return match (strtolower($cipher)) {
-            self::CIPHER_AES_128_ECB => mb_strlen($key, '8bit') === 16,
+            self::CIPHER_AES_128_ECB => strlen($key) === 16,
             self::CIPHER_AES_256_CBC => parent::supported($key, $cipher),
             default => false,
         };
@@ -75,13 +76,11 @@ class DatabaseEncrypter extends BaseEncrypter
 
         $mac = $this->hash($iv, $value, $this->key);
 
-        $json = json_encode(['iv' => $iv, 'value' => $value, 'mac' => $mac], JSON_UNESCAPED_SLASHES);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new EncryptException('Could not encrypt the data.');
+        try {
+            return base64_encode(json_encode(['iv' => $iv, 'value' => $value, 'mac' => $mac], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR));
+        } catch (JsonException $e) {
+            throw new EncryptException('Could not encrypt the data.', $e->getCode(), previous: $e);
         }
-
-        return base64_encode($json);
     }
 
     /**

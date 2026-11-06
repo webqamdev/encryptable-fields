@@ -4,7 +4,7 @@ namespace Webqamdev\EncryptableFields\Support;
 
 use Illuminate\Contracts\Database\Query\Expression;
 use Illuminate\Database\Connection;
-use Illuminate\Support\Facades\DB as Facade;
+use Illuminate\Database\Query\Expression as RawExpression;
 use PDO;
 use WeakMap;
 use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
@@ -40,7 +40,7 @@ class DB
 
     public static function getRawClause(string $column): Expression
     {
-        return Facade::raw(self::getClause($column));
+        return new RawExpression(self::getClause($column));
     }
 
     /**

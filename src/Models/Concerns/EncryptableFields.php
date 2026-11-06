@@ -22,7 +22,7 @@ trait EncryptableFields
     }
 
     /**
-     * checked if field is hashable
+     * Check if a field is hashable
      */
     public function isHashable(string $key): bool
     {
@@ -45,7 +45,11 @@ trait EncryptableFields
         $encryptable = [];
 
         foreach ($this->encryptable as $key => $value) {
-            is_int($key) ? $encryptable[$value] = null : $encryptable[$key] = $value;
+            if (is_int($key)) {
+                $encryptable[$value] = null;
+            } else {
+                $encryptable[$key] = $value;
+            }
         }
 
         return $encryptable;

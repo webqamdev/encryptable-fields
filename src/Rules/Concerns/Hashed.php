@@ -2,8 +2,6 @@
 
 namespace Webqamdev\EncryptableFields\Rules\Concerns;
 
-use Illuminate\Support\Str;
-
 trait Hashed
 {
     /**
@@ -11,7 +9,7 @@ trait Hashed
      */
     public function __construct(string $table, string $column, bool $addHashSuffixIfNeeded = true)
     {
-        if ($addHashSuffixIfNeeded && ! Str::endsWith($column, '_hash')) {
+        if ($addHashSuffixIfNeeded && ! str_ends_with($column, '_hash')) {
             $column .= '_hash';
         }
 

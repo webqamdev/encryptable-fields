@@ -2,7 +2,7 @@
 
 namespace Webqamdev\EncryptableFields\Validation;
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Validation\DatabasePresenceVerifier as BaseDatabasePresenceVerifier;
 
 class DatabasePresenceVerifier extends BaseDatabasePresenceVerifier
@@ -29,7 +29,7 @@ class DatabasePresenceVerifier extends BaseDatabasePresenceVerifier
 
             $query->where($column, '=', $value);
         } else {
-            $query->where(DB::raw($column), '=', $value); // todo serialize($value)
+            $query->where(new Expression($column), '=', $value);
             unset($extra['is_encrypted']);
         }
 
@@ -56,7 +56,7 @@ class DatabasePresenceVerifier extends BaseDatabasePresenceVerifier
         }
 
         if (! empty($extra['is_encrypted'])) {
-            $column = DB::raw($column);
+            $column = new Expression($column);
             unset($extra['is_encrypted']);
         }
 
