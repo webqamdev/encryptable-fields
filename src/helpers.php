@@ -1,12 +1,14 @@
 <?php
 
+use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
+
 if (! function_exists('dbEncrypt')) {
     /**
      * Encrypt the given value.
      */
     function dbEncrypt(mixed $value, bool $serialize = false): string
     {
-        return app('databaseEncrypter')->encrypt($value, $serialize);
+        return app(DatabaseEncrypter::class)->encrypt($value, $serialize);
     }
 }
 
@@ -16,7 +18,7 @@ if (! function_exists('dbDecrypt')) {
      */
     function dbDecrypt(string $value, bool $unserialize = false): mixed
     {
-        return app('databaseEncrypter')->decrypt($value, $unserialize);
+        return app(DatabaseEncrypter::class)->decrypt($value, $unserialize);
     }
 }
 

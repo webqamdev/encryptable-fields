@@ -31,7 +31,7 @@ class DB
 
         $arguments = sprintf("from_base64(json_value(%s, '$.value')), %s", $payload, self::KEY_VARIABLE);
 
-        if (! app('databaseEncrypter')->isEcb()) {
+        if (! app(DatabaseEncrypter::class)->isEcb()) {
             $arguments .= sprintf(", from_base64(json_value(%s, '$.iv'))", $payload);
         }
 
@@ -71,8 +71,7 @@ class DB
     {
         self::$initializedPdos ??= new WeakMap;
 
-        /** @var DatabaseEncrypter $encrypter */
-        $encrypter = app('databaseEncrypter');
+        $encrypter = app(DatabaseEncrypter::class);
 
         $statement = sprintf('set %s = from_base64(?)', self::KEY_VARIABLE);
 
