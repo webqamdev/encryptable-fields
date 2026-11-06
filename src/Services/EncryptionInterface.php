@@ -7,10 +7,10 @@ interface EncryptionInterface
     /**
      * Encrypt the given value.
      */
-    public static function encrypt(mixed $value): string;
+    public function encrypt(mixed $value): string;
 
     /**
      * Decrypt the given value.
      */
-    public static function decrypt(string $value): mixed;
+    public function decrypt(string $value): mixed;
 }

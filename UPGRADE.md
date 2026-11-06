@@ -104,7 +104,7 @@ Once done, remove `APP_DB_ENCRYPTION_LEGACY_KEY` from your `.env` file.
 | `Webqamdev\EncryptableFields\Models\Traits\EncryptableFields`, `HasEncryptableFieldsLog`  | `Webqamdev\EncryptableFields\Models\Concerns\...`                          |
 | `Webqamdev\EncryptableFields\Http\Controllers\Admin\Traits\EncryptedSearchTrait`        | `Webqamdev\EncryptableFields\Http\Controllers\Admin\Concerns\EncryptedSearchTrait` |
 | `Webqamdev\EncryptableFields\Rules\Traits\Encrypted`, `Hashed`                            | `Webqamdev\EncryptableFields\Rules\Concerns\...`                           |
-| Custom `EncryptionInterface` implementation: `encrypt($value)`, `decrypt(string $value)`   | `encrypt(mixed $value): string`, `decrypt(string $value): mixed`           |
+| Custom `EncryptionInterface` implementation: `static encrypt($value)`, `static decrypt(string $value)` | Instance methods: `encrypt(mixed $value): string`, `decrypt(string $value): mixed` |
 | `dbHashValue($value, 'sha256')`                                                            | `dbHashValue($value)`: always HMAC-SHA256, the algorithm argument is ignored |
 | `$model->setEncryptedAttribute()`, `setHashedAttribute()`, `getEncryptedAttribute()`, `getDecryptValue()` | Removed: assign the attribute, the cast handles encryption and hashing |
 | `setAttribute()` / `getAttributeFromArray()` overridden by the trait                       | Not overridden anymore: encryption is an Eloquent cast                     |
