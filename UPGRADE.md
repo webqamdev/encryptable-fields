@@ -113,6 +113,7 @@ Once done, remove `APP_DB_ENCRYPTION_LEGACY_KEY` from your `.env` file.
 | Raw SQL with the key written in it                                                         | Use `Support\DB::getClause()`: the key now lives in the `@encryptable_fields_key` session variable |
 | `Support\DB::getRawClause()` returning `Illuminate\Database\Query\Expression`              | Returns the `Illuminate\Contracts\Database\Query\Expression` interface |
 | `new Hashed($table, $column, false)` still adding `_hash`                                  | `false` keeps the column name as is                                        |
+| `new Encrypted($table)` / `new Hashed($table)` without column                              | `$column` is required                                                      |
 | `'0'` stored as `null`                                                                     | `'0'` is encrypted and hashed                                              |
 
 Casts declared on encrypted attributes in your models are overridden by the package cast: remove them.

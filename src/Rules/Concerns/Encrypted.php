@@ -6,7 +6,7 @@ use Webqamdev\EncryptableFields\Support\DB;
 
 trait Encrypted
 {
-    public function __construct(string $table, string $column = 'NULL')
+    public function __construct(string $table, string $column)
     {
         parent::__construct($table, $column);
 

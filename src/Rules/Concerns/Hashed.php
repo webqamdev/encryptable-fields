@@ -9,7 +9,7 @@ trait Hashed
     /**
      * Create a new rule instance.
      */
-    public function __construct(string $table, string $column = 'NULL', bool $addHashSuffixIfNeeded = true)
+    public function __construct(string $table, string $column, bool $addHashSuffixIfNeeded = true)
     {
         if ($addHashSuffixIfNeeded && ! Str::endsWith($column, '_hash')) {
             $column .= '_hash';
