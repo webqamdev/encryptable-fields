@@ -68,6 +68,8 @@ class DatabaseSearchTest extends TestCase
         $this->assertTrue(Validator::make(['name' => 'Holmes'], ['name' => new UniqueEncrypted('users', 'firstname')])->fails());
         $this->assertTrue(Validator::make(['name' => 'Moriarty'], ['name' => new UniqueEncrypted('users', 'firstname')])->passes());
         $this->assertTrue(Validator::make(['name' => 'Holmes'], ['name' => new ExistsEncrypted('users', 'firstname')])->passes());
+        $this->assertTrue(Validator::make(['names' => ['Holmes', 'Watson']], ['names' => new ExistsEncrypted('users', 'firstname')])->passes());
+        $this->assertTrue(Validator::make(['names' => ['Holmes', 'Moriarty']], ['names' => new ExistsEncrypted('users', 'firstname')])->fails());
     }
 
     public function test_key_never_reaches_query_log(): void

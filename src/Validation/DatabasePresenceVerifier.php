@@ -39,4 +39,29 @@ class DatabasePresenceVerifier extends BaseDatabasePresenceVerifier
 
         return $this->addConditions($query, $extra)->count();
     }
+
+    /**
+     * Count the number of objects in a collection with the given values.
+     *
+     * @param  string  $collection
+     * @param  string  $column
+     * @param  array<int, mixed>  $values
+     * @param  array<string, mixed>  $extra
+     */
+    public function getMultiCount($collection, $column, array $values, array $extra = []): int
+    {
+        if (! empty($extra['is_hashed'])) {
+            $values = array_map(fn (mixed $value): string => dbHashValue((string) $value), $values);
+            unset($extra['is_hashed']);
+        }
+
+        if (! empty($extra['is_encrypted'])) {
+            $column = DB::raw($column);
+            unset($extra['is_encrypted']);
+        }
+
+        $query = $this->table($collection)->whereIn($column, $values);
+
+        return $this->addConditions($query, $extra)->distinct()->count($column);
+    }
 }

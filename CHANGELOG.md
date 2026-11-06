@@ -20,6 +20,7 @@ Breaking changes, see [UPGRADE.md](UPGRADE.md).
 - Ask for confirmation before `encryptable-fields:key-generate` overwrites an existing key
 - Fix `encryptable-fields:key-generate` reporting success when the `.env` value differs from the loaded key
 - Fix `Hashed` rules ignoring the `$addHashSuffixIfNeeded` argument
+- Fix `Exists` `Encrypted` and `Hashed` rules on array values
 - Fix `HasEncryptableFieldsLog` logging non-hashed encrypted attributes in plain text, and new values as old ones
 - Add Laravel Pint, Rector and Larastan, modernize code
 
