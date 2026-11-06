@@ -73,7 +73,7 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
 
     protected function registerBindings(): self
     {
-        $this->app->bind(EncryptionInterface::class, config('encryptable-fields.encryption'));
+        $this->app->singleton(EncryptionInterface::class, config('encryptable-fields.encryption'));
 
         return $this;
     }
