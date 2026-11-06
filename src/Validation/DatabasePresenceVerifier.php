@@ -10,20 +10,19 @@ class DatabasePresenceVerifier extends BaseDatabasePresenceVerifier
     /**
      * Count the number of objects in a collection having the given value.
      *
-     * @param string $collection
-     * @param string $column
-     * @param string $value
-     * @param int|null $excludeId
-     * @param string|null $idColumn
-     * @param array $extra
-     * @return int
+     * @param  string  $collection
+     * @param  string  $column
+     * @param  string  $value
+     * @param  int|string|null  $excludeId
+     * @param  string|null  $idColumn
+     * @param  array<string, mixed>  $extra
      */
-    public function getCount($collection, $column, $value, $excludeId = null, $idColumn = null, array $extra = [])
+    public function getCount($collection, $column, $value, $excludeId = null, $idColumn = null, array $extra = []): int
     {
         $query = $this->table($collection);
 
         if (empty($extra['is_encrypted'])) {
-            if (!empty($extra['is_hashed'])) {
+            if (! empty($extra['is_hashed'])) {
                 $value = dbHashValue($value);
                 unset($extra['is_hashed']);
             }
@@ -34,7 +33,7 @@ class DatabasePresenceVerifier extends BaseDatabasePresenceVerifier
             unset($extra['is_encrypted']);
         }
 
-        if (!is_null($excludeId) && $excludeId !== 'NULL') {
+        if (! is_null($excludeId) && $excludeId !== 'NULL') {
             $query->where($idColumn ?: 'id', '<>', $excludeId);
         }
 

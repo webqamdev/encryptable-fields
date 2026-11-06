@@ -6,22 +6,16 @@ class Encryption implements EncryptionInterface
 {
     /**
      * Encrypt the given value.
-     *
-     * @param  mixed $value
-     * @return string
      */
-    public static function encrypt($value): string
+    public static function encrypt(mixed $value): string
     {
         return encrypt($value);
     }
 
     /**
      * Decrypt the given value.
-     *
-     * @param  string $value
-     * @return mixed
      */
-    public static function decrypt(string $value)
+    public static function decrypt(string $value): mixed
     {
         return decrypt($value);
     }

@@ -2,129 +2,161 @@
 
 namespace Webqamdev\EncryptableFields\Console;
 
-use Illuminate\Encryption\Encrypter;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Foundation\Console\KeyGenerateCommand as BaseCommand;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Random\RandomException;
 use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
 
 class KeyGenerateCommand extends BaseCommand
 {
-    protected const ENV_VARIABLE_NAME = 'APP_DB_ENCRYPTION_KEY';
-    protected const CONFIG_KEY = 'encryptable-fields.key';
-
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
     protected $signature = 'encryptable-fields:key-generate
+                    {--hash : Generate the hash key (APP_DB_HASH_KEY) instead of the database encryption key}
                     {--show : Display the key instead of modifying files}
-                    {--force : Force the operation to run when in production}';
+                    {--force : Overwrite an existing key without confirmation}';
 
     /**
      * Execute the console command.
      *
-     * @return void
+     * @throws RandomException
+     * @throws FileNotFoundException
      */
     public function handle(): void
     {
-        if (!$this->hasEnvironmentVariable()) {
+        if (! $this->hasEnvironmentVariable()) {
             $this->error(
-                sprintf("Missing environment variable. Please add %s= to your .env file.", self::ENV_VARIABLE_NAME)
+                sprintf('Missing environment variable. Please add %s= to your .env file.', $this->envVariableName()),
             );
+
             return;
         }
 
         $key = $this->generateRandomKey();
 
         if ($this->option('show')) {
-            $this->line('<comment>' . $key . '</comment>');
+            $this->line('<comment>'.$key.'</comment>');
+
             return;
         }
 
         // Next, we will replace the application key in the environment file so it is
         // automatically setup for this developer. This key gets generated using a
         // secure random byte generator and is later base64 encoded for storage.
-        if (!$this->setKeyInEnvironmentFile($key)) {
+        if (! $this->setKeyInEnvironmentFile($key)) {
             return;
         }
 
-        $this->laravel['config'][self::CONFIG_KEY] = $key;
+        $this->laravel['config'][$this->configKey()] = $key;
 
         $this->info('Application key set successfully.');
     }
 
+    protected function envVariableName(): string
+    {
+        return $this->option('hash') ? 'APP_DB_HASH_KEY' : 'APP_DB_ENCRYPTION_KEY';
+    }
+
+    protected function configKey(): string
+    {
+        return $this->option('hash') ? 'encryptable-fields.hash_key' : 'encryptable-fields.key';
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
     protected function hasEnvironmentVariable(): bool
     {
         return Str::contains(
             File::get(
                 $this->laravel->environmentFilePath()
             ),
-            self::ENV_VARIABLE_NAME . '='
+            $this->envVariableName().'=',
         );
     }
 
     /**
      * Generate a random key for the application.
      *
-     * @return string
+     * @throws RandomException
      */
     protected function generateRandomKey(): string
     {
-        return 'base64:' . base64_encode(Encrypter::generateKey(DatabaseEncrypter::CIPHER));
+        $key = $this->option('hash')
+            ? random_bytes(32)
+            : DatabaseEncrypter::generateKey($this->laravel['config']['encryptable-fields.cipher']);
+
+        return 'base64:'.base64_encode($key);
     }
 
     /**
      * Set the application key in the environment file.
      *
-     * @param string $key
-     * @return bool
+     * @param  string  $key
      */
     protected function setKeyInEnvironmentFile($key): bool
     {
-        $currentKey = $this->laravel['config'][self::CONFIG_KEY];
+        $currentKey = $this->laravel['config'][$this->configKey()];
 
-        if (strlen($currentKey) !== 0 && (!$this->confirmToProceed())) {
+        if (
+            ! empty($currentKey)
+            && ! $this->option('force') && ! $this->confirm(sprintf(
+                '%s is already set: values encrypted or hashed with it will become unusable. Overwrite it?',
+                $this->envVariableName()
+            ))
+        ) {
+            $this->warn(sprintf('%s not changed.', $this->envVariableName()));
+
             return false;
         }
 
-        $this->writeNewEnvironmentFileWith($key);
-
-        return true;
+        return $this->writeNewEnvironmentFileWith($key);
     }
 
     /**
      * Write a new environment file with the given key.
      *
-     * @param string $key
-     * @return void
+     * @param  string  $key
      */
-    protected function writeNewEnvironmentFileWith($key): void
+    protected function writeNewEnvironmentFileWith($key): bool
     {
         $environmentFilePath = $this->laravel->environmentFilePath();
 
-        file_put_contents(
-            $environmentFilePath,
-            preg_replace(
-                $this->keyReplacementPattern(),
-                self::ENV_VARIABLE_NAME . '=' . $key,
-                file_get_contents($environmentFilePath)
-            )
+        $replaced = preg_replace(
+            $this->keyReplacementPattern(),
+            $this->envVariableName().'='.$key,
+            $input = file_get_contents($environmentFilePath),
         );
+
+        // The pattern matches the loaded key: nothing is replaced when the .env value differs (e.g. cached config)
+        if ($replaced === $input || $replaced === null) {
+            $this->error(sprintf(
+                'Unable to set %s: its .env value differs from the loaded configuration. Clear the config cache and retry.',
+                $this->envVariableName(),
+            ));
+
+            return false;
+        }
+
+        file_put_contents($environmentFilePath, $replaced);
+
+        return true;
     }
 
     /**
      * Get a regex pattern that will match env APP_KEY with any random key.
-     *
-     * @return string
      */
     protected function keyReplacementPattern(): string
     {
         return sprintf(
-            "/^%s=%s/m",
-            self::ENV_VARIABLE_NAME,
-            preg_quote($this->laravel['config'][self::CONFIG_KEY], '/')
+            '/^%s=%s/m',
+            $this->envVariableName(),
+            preg_quote($this->laravel['config'][$this->configKey()], '/'),
         );
     }
 }

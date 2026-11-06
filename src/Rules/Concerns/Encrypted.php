@@ -1,12 +1,12 @@
 <?php
 
-namespace Webqamdev\EncryptableFields\Rules\Traits;
+namespace Webqamdev\EncryptableFields\Rules\Concerns;
 
 use Webqamdev\EncryptableFields\Support\DB;
 
 trait Encrypted
 {
-    public function __construct($table, $column = 'NULL')
+    public function __construct(string $table, string $column = 'NULL')
     {
         parent::__construct($table, $column);
 
@@ -15,11 +15,9 @@ trait Encrypted
 
     /**
      * Convert the rule to a validation string.
-     *
-     * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
-        return parent::__toString() . ',is_encrypted,1';
+        return parent::__toString().',is_encrypted,1';
     }
 }

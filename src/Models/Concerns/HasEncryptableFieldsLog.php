@@ -1,12 +1,12 @@
 <?php
 
-namespace Webqamdev\EncryptableFields\Models\Traits;
+namespace Webqamdev\EncryptableFields\Models\Concerns;
 
 use Spatie\Activitylog\Models\Activity;
 
 trait HasEncryptableFieldsLog
 {
-    public function tapActivity(Activity $activity, string $eventName)
+    public function tapActivity(Activity $activity, string $eventName): void
     {
         if (method_exists($this, 'getEncryptableArray')) {
             // Encryption is enabled

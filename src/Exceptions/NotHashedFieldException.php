@@ -2,15 +2,12 @@
 
 namespace Webqamdev\EncryptableFields\Exceptions;
 
-class NotHashedFieldException extends \Exception
-{
-    public function __construct($message, $code = 0, \Exception $previous = null)
-    {
-        parent::__construct($message, $code, $previous);
-    }
+use Exception;
 
-    public function __toString()
+class NotHashedFieldException extends Exception
+{
+    public function __toString(): string
     {
-        return __CLASS__ . ": {$this->message}\n";
+        return self::class.': '.$this->message."\n";
     }
 }
