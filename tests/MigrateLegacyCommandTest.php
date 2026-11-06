@@ -5,6 +5,7 @@ namespace Webqamdev\EncryptableFields\Tests;
 use Illuminate\Support\Facades\DB;
 use ReflectionException;
 use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
+use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
 use Webqamdev\EncryptableFields\Services\DatabaseEncryption;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 use Webqamdev\EncryptableFields\Tests\Models\User;
@@ -15,6 +16,9 @@ class MigrateLegacyCommandTest extends TestCase
 
     private const string LEGACY_SALT = '--mDwt\k+PY,}vUJf2WeYUJ]yb(7A?>>bu7fGZrDpRUn#-kab';
 
+    /**
+     * @throws NotHashedFieldException
+     */
     public function test_rehashes_values_encrypted_with_laravel_encrypter(): void
     {
         $id = DB::table('users')->insertGetId([
@@ -29,6 +33,7 @@ class MigrateLegacyCommandTest extends TestCase
     }
 
     /**
+     * @throws NotHashedFieldException
      * @throws ReflectionException
      */
     public function test_reencrypts_legacy_database_values(): void
@@ -55,6 +60,15 @@ class MigrateLegacyCommandTest extends TestCase
         $this->artisan('encryptable-fields:migrate-legacy', ['models' => [User::class]])
             ->expectsOutputToContain('0 row(s) migrated')
             ->assertSuccessful();
+    }
+
+    public function test_validates_every_model_before_migrating(): void
+    {
+        DB::table('users')->insert(['firstname' => encrypt('watson'), 'firstname_hash' => 'legacy']);
+
+        $this->artisan('encryptable-fields:migrate-legacy', ['models' => [User::class, 'App\\Missing']])->assertFailed();
+
+        $this->assertSame('legacy', DB::table('users')->value('firstname_hash'));
     }
 
     /**

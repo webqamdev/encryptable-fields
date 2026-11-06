@@ -3,6 +3,7 @@
 namespace Webqamdev\EncryptableFields\Console;
 
 use Illuminate\Console\Command;
+use Illuminate\Console\ConfirmableTrait;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Model;
 use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
@@ -16,14 +17,30 @@ use Webqamdev\EncryptableFields\Services\EncryptionInterface;
  */
 class MigrateLegacyCommand extends Command
 {
+    use ConfirmableTrait;
+
     protected $signature = 'encryptable-fields:migrate-legacy
                     {models* : Model classes using the EncryptableFields trait}
-                    {--chunk=500 : Number of rows loaded at once}';
+                    {--chunk=500 : Number of rows loaded at once}
+                    {--force : Force the operation to run when in production}';
 
     protected $description = 'Migrate encrypted and hashed values from encryptable-fields v3 to v4';
 
     public function handle(EncryptionInterface $encryption): int
     {
+        // Validate every model before updating any row
+        foreach ($this->argument('models') as $class) {
+            if (! is_subclass_of($class, Model::class) || ! in_array(EncryptableFields::class, class_uses_recursive($class), true)) {
+                $this->error(sprintf('%s is not a model using the EncryptableFields trait.', $class));
+
+                return self::FAILURE;
+            }
+        }
+
+        if (! $this->confirmToProceed()) {
+            return self::FAILURE;
+        }
+
         $legacyEncrypter = null;
 
         if ($encryption instanceof DatabaseEncryption) {
@@ -40,12 +57,6 @@ class MigrateLegacyCommand extends Command
         }
 
         foreach ($this->argument('models') as $class) {
-            if (! is_subclass_of($class, Model::class) || ! in_array(EncryptableFields::class, class_uses_recursive($class), true)) {
-                $this->error(sprintf('%s is not a model using the EncryptableFields trait.', $class));
-
-                return self::FAILURE;
-            }
-
             $count = 0;
 
             $class::query()->withoutGlobalScopes()->chunkById(

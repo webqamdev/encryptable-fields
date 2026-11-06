@@ -87,7 +87,7 @@ php artisan encryptable-fields:migrate-legacy "App\Models\User" "App\Models\Cust
 php artisan up
 ```
 
-The command:
+In production, it asks for confirmation: add `--force` to skip it. The command:
 
 - recomputes every hash with the new key,
 - with `DatabaseEncryption`, decrypts values with the v3 key and encrypts them with the new one.
