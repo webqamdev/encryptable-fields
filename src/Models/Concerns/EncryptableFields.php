@@ -2,6 +2,7 @@
 
 namespace Webqamdev\EncryptableFields\Models\Concerns;
 
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Webqamdev\EncryptableFields\Casts\Encrypted;
 use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
@@ -64,7 +65,8 @@ trait EncryptableFields
      *
      * @throws NotHashedFieldException
      */
-    public function scopeWhereEncrypted(Builder $query, string $key, string $value): void
+    #[Scope]
+    protected function whereEncrypted(Builder $query, string $key, string $value): void
     {
         if (! $this->isHashable($key)) {
             throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
