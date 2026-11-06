@@ -22,7 +22,7 @@ trait EncryptedSearchTrait
             $query->orWhere(
                 DB::getRawClause($column),
                 'like',
-                '%'.$searchTerm.'%',
+                '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $searchTerm).'%',
             );
         }
 
