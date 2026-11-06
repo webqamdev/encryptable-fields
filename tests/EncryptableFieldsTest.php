@@ -13,7 +13,10 @@ class EncryptableFieldsTest extends TestCase
 
         $row = $this->row($user->id);
         $this->assertNotSame('watson', $row->firstname);
-        $this->assertSame(hash_hmac('sha256', 'watson', config('encryptable-fields.hash_key')), $row->firstname_hash);
+        $this->assertSame(
+            hash_hmac('sha256', 'watson', base64_decode(substr(config('encryptable-fields.hash_key'), 7))),
+            $row->firstname_hash,
+        );
 
         $user = User::query()->find($user->id);
         $this->assertSame('watson', $user->firstname);

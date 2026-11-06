@@ -36,6 +36,10 @@ if (! function_exists('dbHashValue')) {
             throw new RuntimeException('No hash key has been specified (APP_DB_HASH_KEY).');
         }
 
+        if (str_starts_with($key, 'base64:')) {
+            $key = base64_decode(substr($key, 7));
+        }
+
         return hash_hmac('sha256', $data, $key);
     }
 }
