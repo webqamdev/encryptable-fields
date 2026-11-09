@@ -62,6 +62,32 @@ class MigrateLegacyCommandTest extends TestCase
             ->assertSuccessful();
     }
 
+    /**
+     * @throws NotHashedFieldException
+     * @throws ReflectionException
+     */
+    public function test_encrypts_plain_values(): void
+    {
+        $this->app->bind(EncryptionInterface::class, DatabaseEncryption::class);
+
+        DB::table('users')->insert(['firstname' => 'watson', 'email' => '0']);
+        DB::table('users')->insert(['firstname' => dbEncrypt('holmes'), 'firstname_hash' => dbHashValue('holmes')]);
+
+        $this->artisan('encryptable-fields:migrate-legacy', ['models' => [User::class], '--from-plain' => true])
+            ->expectsOutputToContain('1 row(s) migrated')
+            ->assertSuccessful();
+
+        $user = User::whereEncrypted('firstname', 'watson')->sole();
+        $this->assertSame('watson', $user->firstname);
+        $this->assertSame('0', dbDecrypt($user->getAttributes()['email']));
+        $this->assertSame('holmes', User::whereEncrypted('firstname', 'holmes')->sole()->firstname);
+
+        // Second run skips already encrypted values
+        $this->artisan('encryptable-fields:migrate-legacy', ['models' => [User::class], '--from-plain' => true])
+            ->expectsOutputToContain('0 row(s) migrated')
+            ->assertSuccessful();
+    }
+
     public function test_validates_every_model_before_migrating(): void
     {
         DB::table('users')->insert(['firstname' => encrypt('watson'), 'firstname_hash' => 'legacy']);

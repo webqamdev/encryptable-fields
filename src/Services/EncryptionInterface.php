@@ -2,6 +2,8 @@
 
 namespace Webqamdev\EncryptableFields\Services;
 
+use Illuminate\Contracts\Encryption\DecryptException;
+
 interface EncryptionInterface
 {
     /**
@@ -11,6 +13,8 @@ interface EncryptionInterface
 
     /**
      * Decrypt the given value.
+     *
+     * @throws DecryptException
      */
     public function decrypt(string $value): mixed;
 }

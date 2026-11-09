@@ -2,6 +2,10 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
+## Unreleased
+
+- Add `encryptable-fields:migrate-legacy --from-plain` option to encrypt and hash values stored in plain text
+
 ## [4.0.0](https://github.com/webqamdev/encryptable-fields/compare/3.2.0...4.0.0) - 2026-11-09
 
 Breaking changes, see [UPGRADE.md](UPGRADE.md).

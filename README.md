@@ -371,18 +371,16 @@ With [spatie/laravel-activitylog](https://github.com/spatie/laravel-activitylog)
 or [webqamdev/activity-logger-for-laravel](https://github.com/webqamdev/activity-logger-for-laravel), add the
 `HasEncryptableFieldsLog` trait to each logged model: logs then contain encrypted values instead of decrypted ones.
 
-### Fixing a bad implementation
+### Encrypting plain text values
 
-If you miss-implemented this package and it's configuration (ie: data are not well encrypted, you forgot to init an encrypt key, ...),
-you will be able to fix this by using the available command. 
+If values were stored in plain text (encryption added to an existing column, misconfigured model, ...), encrypt and hash
+them once the model is configured:
 
-First fix the missing/wrong configuration, then run this command : 
-
-```shell
-php artisan encryptable-fields:fix-missing-key {ModelFQN} [--processed-fields=field1,field2,...]
+```bash
+php artisan encryptable-fields:migrate-legacy "App\Models\User" --from-plain
 ```
 
-Also, a trait is available if you want to write your own fix command : `\Webqamdev\EncryptableFields\Console\Traits\FixEncryptTrait`
+Values that are already encrypted are left untouched, so the command can be run several times.
 
 ## Testing
 
