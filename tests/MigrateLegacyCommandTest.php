@@ -28,8 +28,8 @@ class MigrateLegacyCommandTest extends TestCase
 
         $this->artisan('encryptable-fields:migrate-legacy', ['models' => [User::class]])->assertSuccessful();
 
-        $this->assertSame('watson', User::whereEncrypted('firstname', 'watson')->sole()->firstname);
-        $this->assertSame($id, User::whereEncrypted('firstname', 'watson')->sole()->id);
+        $this->assertSame('watson', User::whereHashed('firstname', 'watson')->sole()->firstname);
+        $this->assertSame($id, User::whereHashed('firstname', 'watson')->sole()->id);
     }
 
     /**
@@ -52,7 +52,7 @@ class MigrateLegacyCommandTest extends TestCase
             ->expectsOutputToContain('1 row(s) migrated')
             ->assertSuccessful();
 
-        $user = User::whereEncrypted('firstname', 'watson')->sole();
+        $user = User::whereHashed('firstname', 'watson')->sole();
         $this->assertSame('watson', $user->firstname);
         $this->assertSame('0', $user->getAttributes()['email'] === null ? null : app(DatabaseEncrypter::class)->decrypt($user->getAttributes()['email']));
 

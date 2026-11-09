@@ -48,6 +48,16 @@ class DatabaseSearchTest extends TestCase
         $this->assertSame(1, User::query()->whereRaw(DB::getClause('users.firstname').' = ?', ['Ünïcode'])->count());
     }
 
+    public function test_where_encrypted_scope(): void
+    {
+        $this->assertSame(['Holmes'], User::query()->whereEncrypted('firstname', 'Holmes')->pluck('firstname')->all());
+        // Non-hashed encrypted columns are decrypted too
+        $user = User::query()->create(['email' => 'jack@example.com']);
+        $this->assertSame($user->id, User::query()->whereEncrypted('email', 'jack@example.com')->sole()->id);
+        // Plain columns are matched as is
+        $this->assertSame($user->id, User::query()->whereEncrypted('id', (string) $user->id)->sole()->id);
+    }
+
     public function test_search_and_order_logic(): void
     {
         $controller = new class

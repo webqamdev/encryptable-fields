@@ -108,11 +108,18 @@ Find a model from a hashed value:
 User::query()->where('email_hash', dbHashValue('john.watson@example.com'))->first();
 ```
 
-or with the model's local scope:
+or with the model's local scopes:
 
 ```php
+// Exact match on the hash column, throws NotHashedFieldException if the attribute has no hash column
+User::query()->whereHashed('name', 'John WATSON')->first();
+
+// Exact match on the decrypted value with DatabaseEncryption, falls back to whereHashed() otherwise
 User::query()->whereEncrypted('name', 'John WATSON')->first();
 ```
+
+With `DatabaseEncryption`, `whereEncrypted()` decrypts every row: prefer `whereHashed()` on large tables, hash columns
+can be indexed.
 
 ### Authentication
 

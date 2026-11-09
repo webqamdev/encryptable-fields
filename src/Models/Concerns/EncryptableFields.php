@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Webqamdev\EncryptableFields\Casts\Encrypted;
 use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
+use Webqamdev\EncryptableFields\Services\DatabaseEncryption;
+use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 use Webqamdev\EncryptableFields\Support\DB;
 
 /**
@@ -59,7 +61,7 @@ trait EncryptableFields
     }
 
     /**
-     * A scope to search for encrypted values in the database
+     * A scope to search for a value on its hash column
      *
      * @param  Builder<static>  $query  The QueryBuilder
      * @param  string  $key  The column name
@@ -68,13 +70,40 @@ trait EncryptableFields
      * @throws NotHashedFieldException
      */
     #[Scope]
-    protected function whereEncrypted(Builder $query, string $key, string $value): void
+    protected function whereHashed(Builder $query, string $key, string $value): void
     {
         if (! $this->isHashable($key)) {
             throw new NotHashedFieldException(sprintf('%s is not hashable', $key));
         }
 
         $query->where($this->getEncryptableArray()[$key], dbHashValue($value));
+    }
+
+    /**
+     * A scope to search for a value on its decrypted value with DatabaseEncryption, on its hash column otherwise.
+     * Columns which are not encrypted are matched as is with DatabaseEncryption.
+     *
+     * @param  Builder<static>  $query  The QueryBuilder
+     * @param  string  $key  The column name
+     * @param  string  $value  The non-encrypted value to search for
+     *
+     * @throws NotHashedFieldException Without DatabaseEncryption, when the column is not hashed
+     */
+    #[Scope]
+    protected function whereEncrypted(Builder $query, string $key, string $value): void
+    {
+        if (! app(EncryptionInterface::class) instanceof DatabaseEncryption) {
+            $this->whereHashed($query, $key, $value);
+
+            return;
+        }
+
+        $qualified = $query->qualifyColumn($key);
+
+        $query->where(
+            $this->isEncryptable($key) ? DB::getRawClause($qualified, $query->getQuery()->getGrammar()) : $qualified,
+            $value,
+        );
     }
 
     /**
