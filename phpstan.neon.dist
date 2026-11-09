@@ -1,0 +1,28 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 6
+    paths:
+        - config
+        - src
+        - tests
+    ignoreErrors:
+        # config/ is the package config, not the application one
+        -
+            identifier: larastan.noEnvCallsOutsideOfConfig
+            path: config/config.php
+        # Requires spatie/laravel-activitylog, not installed in this package
+        -
+            identifier: class.notFound
+            path: src/Models/Concerns/HasEncryptableFieldsLog.php
+    # Same rules as PhpStorm "Unhandled exception" inspection
+    exceptions:
+        implicitThrows: false
+        uncheckedExceptionClasses:
+            - LogicException
+            - RuntimeException
+            - Error
+        check:
+            missingCheckedExceptionInThrows: true
+            tooWideThrowType: true

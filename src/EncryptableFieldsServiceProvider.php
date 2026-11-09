@@ -4,9 +4,9 @@ namespace Webqamdev\EncryptableFields;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
-use RuntimeException;
 use Webqamdev\EncryptableFields\Auth\EloquentHashedUserProvider;
 use Webqamdev\EncryptableFields\Console\KeyGenerateCommand;
+use Webqamdev\EncryptableFields\Console\MigrateLegacyCommand;
 use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 use Webqamdev\EncryptableFields\Validation\DatabasePresenceVerifier;
 
@@ -28,9 +28,9 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
     {
         $this->publishes(
             [
-                __DIR__ . '/../config/config.php' => config_path('encryptable-fields.php'),
+                __DIR__.'/../config/config.php' => config_path('encryptable-fields.php'),
             ],
-            'config'
+            'config',
         );
 
         return $this;
@@ -38,9 +38,13 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
 
     protected function bootAuthProviders(): self
     {
-        Auth::provider('eloquent-hashed', function ($app, array $config) {
-            return new EloquentHashedUserProvider($this->app['hash'], $config['model']);
-        });
+        Auth::provider(
+            'eloquent-hashed',
+            fn ($app, array $config): EloquentHashedUserProvider => new EloquentHashedUserProvider(
+                $this->app['hash'],
+                $config['model'],
+            ),
+        );
 
         return $this;
     }
@@ -54,24 +58,14 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
             ->registerPresenceVerifier()
             ->mergeConfiguration()
             ->registerBindings()
-            ->registerCommands()
-            ->loadHelpers();
-    }
-
-    /**
-     * Load the Backpack helper methods, for convenience.
-     */
-    public function loadHelpers(): self
-    {
-        require_once __DIR__ . '/helpers.php';
-
-        return $this;
+            ->registerCommands();
     }
 
     protected function registerCommands(): self
     {
         $this->commands([
             KeyGenerateCommand::class,
+            MigrateLegacyCommand::class,
         ]);
 
         return $this;
@@ -79,42 +73,22 @@ class EncryptableFieldsServiceProvider extends ServiceProvider
 
     protected function registerBindings(): self
     {
-        $this->app->bind(EncryptionInterface::class, config('encryptable-fields.encryption'));
+        $this->app->singleton(EncryptionInterface::class, config('encryptable-fields.encryption'));
 
         return $this;
     }
 
     protected function mergeConfiguration(): self
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/config.php', 'encryptable-fields');
+        $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'encryptable-fields');
 
         return $this;
     }
 
     protected function registerPresenceVerifier(): self
     {
-        $this->app->extend('validation.presence', function ($presenceVerifier, $app) {
-            return new DatabasePresenceVerifier($app['db']);
-        });
+        $this->app->extend('validation.presence', fn ($presenceVerifier, $app): DatabasePresenceVerifier => new DatabasePresenceVerifier($app['db']));
 
         return $this;
-    }
-
-    /**
-     * Extract the encryption key from the given configuration.
-     *
-     * @param array $config
-     * @return string
-     * @throws RuntimeException
-     */
-    protected function key(array $config)
-    {
-        return tap($config['key'], function ($key) {
-            if (empty($key)) {
-                throw new RuntimeException(
-                    'No application encryption key has been specified.'
-                );
-            }
-        });
     }
 }

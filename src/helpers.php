@@ -1,43 +1,45 @@
 <?php
 
-if (!function_exists('dbEncrypt')) {
+use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
+
+if (! function_exists('dbEncrypt')) {
     /**
      * Encrypt the given value.
-     *
-     * @param mixed $value
-     * @param bool $serialize
-     * @return string
      */
-    function dbEncrypt($value, bool $serialize = false): string
+    function dbEncrypt(mixed $value, bool $serialize = false): string
     {
-        return app('databaseEncrypter')->encrypt($value, $serialize);
+        return app(DatabaseEncrypter::class)->encrypt($value, $serialize);
     }
 }
 
-if (!function_exists('dbDecrypt')) {
+if (! function_exists('dbDecrypt')) {
     /**
      * Decrypt the given value.
-     *
-     * @param string $value
-     * @param bool $unserialize
-     * @return mixed
      */
-    function dbDecrypt(string $value, bool $unserialize = false)
+    function dbDecrypt(string $value, bool $unserialize = false): mixed
     {
-        return app('databaseEncrypter')->decrypt($value, $unserialize);
+        return app(DatabaseEncrypter::class)->decrypt($value, $unserialize);
     }
 }
 
-if (!function_exists('dbHashValue')) {
+if (! function_exists('dbHashValue')) {
     /**
-     * Hash the given value.
+     * Hash the given value with HMAC-SHA256.
      *
-     * @param string $data
-     * @param string $algorithm
-     * @return string
+     * @throws RuntimeException
      */
-    function dbHashValue(string $data, string $algorithm = 'sha1'): string
+    function dbHashValue(string $data): string
     {
-        return hash($algorithm, $data . config('encryptable-fields.hash_salt'));
+        $key = config('encryptable-fields.hash_key');
+
+        if (empty($key)) {
+            throw new RuntimeException('No hash key has been specified (APP_DB_HASH_KEY).');
+        }
+
+        if (str_starts_with($key, 'base64:')) {
+            $key = base64_decode(substr($key, 7));
+        }
+
+        return hash_hmac('sha256', $data, $key);
     }
 }
