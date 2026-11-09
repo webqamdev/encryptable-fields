@@ -1,6 +1,6 @@
 {
     "name": "webqamdev/encryptable-fields",
-    "description": "Laravel Backpack Fields Encryptable",
+    "description": "Laravel Eloquent Fields Encryptable",
     "keywords": [
         "webqamdev",
         "webqamdeveloppement",
@@ -12,20 +12,27 @@
     "type": "library",
     "authors": [
         {
-            "name": "Thomas Combe",
-            "email": "thomascombe42@gmail.com",
+            "name": "Jérémy ARGOUD",
+            "email": "jargoud@webqam.fr",
+            "role": "Developer"
+        },
+        {
+            "name": "Robin DESORME",
+            "email": "rdesorme@webqam.fr",
             "role": "Developer"
         }
     ],
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "ext-openssl": "*",
-        "ext-json": "*",
-        "illuminate/support": "^11.0|^12.0|^13.0"
+        "laravel/framework": "^13.0"
     },
     "require-dev": {
-        "orchestra/testbench": "^9.1.5",
-        "phpunit/phpunit": "^10.5|^11.0|^12.0"
+        "larastan/larastan": "^3.14",
+        "laravel/pint": "^1.32",
+        "orchestra/testbench": "^11.0",
+        "phpunit/phpunit": "^12.0",
+        "rector/rector": "^2.8"
     },
     "autoload": {
         "psr-4": {
@@ -42,7 +49,10 @@
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
-        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+        "format": "vendor/bin/pint",
+        "refactor": "vendor/bin/rector",
+        "analyse": "vendor/bin/phpstan analyse"
     },
     "config": {
         "sort-packages": true

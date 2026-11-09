@@ -1,0 +1,132 @@
+<?php
+
+namespace Webqamdev\EncryptableFields\Tests;
+
+use Illuminate\Support\Facades\DB as Facade;
+use Illuminate\Support\Facades\Validator;
+use ReflectionException;
+use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
+use Webqamdev\EncryptableFields\Filament\Concerns\SearchesEncryptedAttributes;
+use Webqamdev\EncryptableFields\Http\Controllers\Admin\Concerns\EncryptedSearchTrait;
+use Webqamdev\EncryptableFields\Rules\Exists\Encrypted as ExistsEncrypted;
+use Webqamdev\EncryptableFields\Rules\Unique\Encrypted as UniqueEncrypted;
+use Webqamdev\EncryptableFields\Services\DatabaseEncryption;
+use Webqamdev\EncryptableFields\Services\EncryptionInterface;
+use Webqamdev\EncryptableFields\Support\DB;
+use Webqamdev\EncryptableFields\Tests\Models\User;
+
+/**
+ * Runs against MySQL / MariaDB only, e.g. DB_CONNECTION=mysql DB_HOST=... vendor/bin/phpunit
+ */
+class DatabaseSearchTest extends TestCase
+{
+    /**
+     * @throws ReflectionException
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (! in_array(Facade::connection()->getDriverName(), ['mysql', 'mariadb'], true)) {
+            $this->markTestSkipped('Requires a MySQL or MariaDB connection.');
+        }
+
+        if (! app(DatabaseEncrypter::class)->isEcb() && $this->isMariaDbBelow112()) {
+            $this->markTestSkipped('aes-256-cbc requires MariaDB 11.2+.');
+        }
+
+        $this->app->bind(EncryptionInterface::class, DatabaseEncryption::class);
+
+        foreach (['Watson', 'Holmes', 'Ünïcode'] as $firstname) {
+            User::query()->create(['firstname' => $firstname]);
+        }
+    }
+
+    public function test_where_on_decrypted_value(): void
+    {
+        $this->assertSame(1, User::query()->whereRaw(DB::getClause('firstname').' = ?', ['Holmes'])->count());
+        $this->assertSame(1, User::query()->whereRaw(DB::getClause('users.firstname').' = ?', ['Ünïcode'])->count());
+    }
+
+    public function test_search_and_order_logic(): void
+    {
+        $controller = new class
+        {
+            use EncryptedSearchTrait {
+                encryptedSearchLogic as public;
+                encryptedOrderLogic as public;
+            }
+        };
+
+        $this->assertSame(['Holmes'], $controller->encryptedSearchLogic(User::query(), 'firstname', 'olm')->get()->pluck('firstname')->all());
+        $this->assertSame(
+            ['Holmes', 'Ünïcode', 'Watson'],
+            $controller->encryptedOrderLogic(User::query(), 'firstname', 'asc')->get()->pluck('firstname')->all(),
+        );
+    }
+
+    public function test_search_encrypted_scope(): void
+    {
+        $this->assertSame(['Holmes'], User::query()->searchEncrypted('OLM', 'firstname')->pluck('firstname')->all());
+        $this->assertSame([], User::query()->searchEncrypted('zzz', ['firstname', 'email'])->pluck('firstname')->all());
+        // LIKE wildcards typed by the user are literals
+        $this->assertSame([], User::query()->searchEncrypted('%', 'firstname')->pluck('firstname')->all());
+        // Conditions are grouped: the OR does not leak into the outer query
+        $this->assertSame([], User::query()->where('id', 0)->searchEncrypted('olm', 'firstname')->pluck('firstname')->all());
+        // Plain columns are matched as is
+        $hash = substr(dbHashValue('Holmes'), 0, 10);
+        $this->assertSame(['Holmes'], User::query()->searchEncrypted($hash, ['firstname', 'firstname_hash'])->pluck('firstname')->all());
+    }
+
+    public function test_filament_global_search(): void
+    {
+        $resource = new class
+        {
+            use SearchesEncryptedAttributes {
+                applyGlobalSearchAttributeConstraints as public;
+            }
+
+            /**
+             * @return array<string|string[]>
+             */
+            public static function getGloballySearchableAttributes(): array
+            {
+                return [['firstname', 'email'], 'nickname'];
+            }
+        };
+
+        $query = User::query();
+        $resource::applyGlobalSearchAttributeConstraints($query, 'olm');
+
+        $this->assertSame(['Holmes'], $query->pluck('firstname')->all());
+    }
+
+    public function test_validation_rules(): void
+    {
+        $this->assertTrue(Validator::make(['name' => 'Holmes'], ['name' => new UniqueEncrypted('users', 'firstname')])->fails());
+        $this->assertTrue(Validator::make(['name' => 'Moriarty'], ['name' => new UniqueEncrypted('users', 'firstname')])->passes());
+        $this->assertTrue(Validator::make(['name' => 'Holmes'], ['name' => new ExistsEncrypted('users', 'firstname')])->passes());
+        $this->assertTrue(Validator::make(['names' => ['Holmes', 'Watson']], ['names' => new ExistsEncrypted('users', 'firstname')])->passes());
+        $this->assertTrue(Validator::make(['names' => ['Holmes', 'Moriarty']], ['names' => new ExistsEncrypted('users', 'firstname')])->fails());
+    }
+
+    public function test_key_never_reaches_query_log(): void
+    {
+        Facade::enableQueryLog();
+
+        User::query()->whereRaw(DB::getClause('firstname').' = ?', ['Holmes'])->first();
+
+        $key = base64_encode(app(DatabaseEncrypter::class)->getKey());
+        foreach (Facade::getQueryLog() as $query) {
+            $this->assertStringNotContainsString($key, $query['query'].json_encode($query['bindings']));
+        }
+        $this->assertNotEmpty(Facade::getQueryLog());
+    }
+
+    private function isMariaDbBelow112(): bool
+    {
+        $version = Facade::selectOne('select version() as v')->v;
+
+        return str_contains(strtolower($version), 'mariadb') && version_compare($version, '11.2', '<');
+    }
+}
