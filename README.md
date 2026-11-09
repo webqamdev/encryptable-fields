@@ -316,7 +316,8 @@ Differences with Filament's default global search:
 
 For [Laravel Backpack](https://backpackforlaravel.com), the
 [EncryptedSearchTrait](./src/Http/Controllers/Admin/Concerns/EncryptedSearchTrait.php) trait provides search and order
-logics.
+logics. `encryptedSearchLogic()` relies on the [`searchEncrypted` scope](#searchencrypted-scope), so the model must use
+`EncryptableFields`.
 
 ```php
 use Illuminate\Database\Eloquent\Builder;

@@ -117,6 +117,7 @@ Once done, remove `APP_DB_ENCRYPTION_LEGACY_KEY` from your `.env` file.
 | `new Hashed($table, $column, false)` still adding `_hash`                                  | `false` keeps the column name as is                                        |
 | `new Encrypted($table)` / `new Hashed($table)` without column                              | `$column` is required                                                      |
 | `'0'` stored as `null`                                                                     | `'0'` is encrypted and hashed                                              |
+| `encryptedSearchLogic()` decrypting every given column, on any model                       | Uses the `searchEncrypted()` scope: the model must use `EncryptableFields`, columns not listed in `$encryptable` are matched as is |
 
 Casts declared on encrypted attributes in your models are overridden by the package cast: remove them.
 

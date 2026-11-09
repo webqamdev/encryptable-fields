@@ -10,6 +10,8 @@ use Webqamdev\EncryptableFields\Support\DB;
 trait EncryptedSearchTrait
 {
     /**
+     * Adds an OR condition, as Backpack groups the search logics of all columns. The model must use EncryptableFields.
+     *
      * @template TModel of Model
      *
      * @param  Builder<TModel>  $query
@@ -18,15 +20,7 @@ trait EncryptedSearchTrait
      */
     protected function encryptedSearchLogic(Builder $query, array|string $columns, string $searchTerm): Builder
     {
-        foreach (Arr::wrap($columns) as $column) {
-            $query->orWhere(
-                DB::getRawClause($column, $query->getQuery()->getGrammar()),
-                'like',
-                '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $searchTerm).'%',
-            );
-        }
-
-        return $query;
+        return $query->orWhere(fn (Builder $query) => $query->scopes(['searchEncrypted' => [$searchTerm, $columns]]));
     }
 
     /**
