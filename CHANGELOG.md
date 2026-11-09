@@ -2,11 +2,14 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
-## [4.0.0](https://github.com/webqamdev/encryptable-fields/compare/3.2.0...master) - Unreleased
+## [4.0.0](https://github.com/webqamdev/encryptable-fields/compare/3.2.0...4.0.0) - 2026-11-09
 
 Breaking changes, see [UPGRADE.md](UPGRADE.md).
 
 - Require PHP 8.3+ and Laravel 13
+- Drop `ext-json` requirement (bundled since PHP 8.0)
+- `EncryptionInterface` methods are no longer static
+- Declare `whereEncrypted` scope with the `Scope` attribute
 - Hash values with HMAC-SHA256 and a dedicated `APP_DB_HASH_KEY` instead of a salted SHA-1 (`hash_salt` config removed)
 - Use the full database encryption key (128 bits instead of 64 bits) instead of a truncated SHA-512 of it
 - Add `aes-256-cbc` database cipher (`APP_DB_ENCRYPTION_CIPHER`), for MySQL 5.6.17+ / MariaDB 11.2+
@@ -25,6 +28,14 @@ Breaking changes, see [UPGRADE.md](UPGRADE.md).
 - Fix `Exists` `Encrypted` and `Hashed` rules on array values
 - Fix `HasEncryptableFieldsLog` logging non-hashed encrypted attributes in plain text, and new values as old ones
 - Fix `eloquent-hashed` auth provider failing on array credentials and ignoring closure credentials
+- Fix base64 `APP_DB_HASH_KEY` not being decoded before hashing values
+- Fix table prefix not applied in encrypted column clauses
+- Fix `Encrypted` and `Hashed` validation rules ignoring the connection grammar
+- Explicit error when the database encryption key is missing
+- `encryptable-fields:key-generate` describes the command and fails when the env variable is missing
+- `encryptable-fields:migrate-legacy` validates models and asks for confirmation in production
+- Delegate encrypted presence verifier counts to Laravel
+- Register `EncryptionInterface` as a singleton
 - Add `searchEncrypted()` scope and Filament `SearchesEncryptedAttributes` resource trait for global search
 - `EncryptedSearchTrait::encryptedSearchLogic()` uses the `searchEncrypted()` scope: the model must use `EncryptableFields`
 - Add Laravel Pint, Rector and Larastan, modernize code
