@@ -64,6 +64,19 @@ class DatabaseSearchTest extends TestCase
         );
     }
 
+    public function test_search_encrypted_scope(): void
+    {
+        $this->assertSame(['Holmes'], User::query()->searchEncrypted('OLM', 'firstname')->pluck('firstname')->all());
+        $this->assertSame([], User::query()->searchEncrypted('zzz', ['firstname', 'email'])->pluck('firstname')->all());
+        // LIKE wildcards typed by the user are literals
+        $this->assertSame([], User::query()->searchEncrypted('%', 'firstname')->pluck('firstname')->all());
+        // Conditions are grouped: the OR does not leak into the outer query
+        $this->assertSame([], User::query()->where('id', 0)->searchEncrypted('olm', 'firstname')->pluck('firstname')->all());
+        // Plain columns are matched as is
+        $hash = substr(dbHashValue('Holmes'), 0, 10);
+        $this->assertSame(['Holmes'], User::query()->searchEncrypted($hash, ['firstname', 'firstname_hash'])->pluck('firstname')->all());
+    }
+
     public function test_validation_rules(): void
     {
         $this->assertTrue(Validator::make(['name' => 'Holmes'], ['name' => new UniqueEncrypted('users', 'firstname')])->fails());

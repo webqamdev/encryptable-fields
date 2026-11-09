@@ -4,8 +4,10 @@ namespace Webqamdev\EncryptableFields\Models\Concerns;
 
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Arr;
 use Webqamdev\EncryptableFields\Casts\Encrypted;
 use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
+use Webqamdev\EncryptableFields\Support\DB;
 
 /**
  * Registers an Encrypted cast for each attribute listed in the $encryptable property.
@@ -73,6 +75,28 @@ trait EncryptableFields
         }
 
         $query->where($this->getEncryptableArray()[$key], dbHashValue($value));
+    }
+
+    /**
+     * A scope to search a term in decrypted values with LIKE, in any of the given columns (OR).
+     * Columns which are not encrypted are matched as is. Requires searchable encrypted values.
+     *
+     * @param  Builder<static>  $query  The QueryBuilder
+     * @param  string  $search  The non-encrypted term to search for
+     * @param  string[]|string  $columns  The column names
+     */
+    #[Scope]
+    protected function searchEncrypted(Builder $query, string $search, array|string $columns): void
+    {
+        $like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search).'%';
+        $grammar = $query->getQuery()->getGrammar();
+
+        $query->where(function (Builder $query) use ($columns, $grammar, $like): void {
+            foreach (Arr::wrap($columns) as $column) {
+                $qualified = $query->qualifyColumn($column);
+                $query->orWhere($this->isEncryptable($column) ? DB::getRawClause($qualified, $grammar) : $qualified, 'like', $like);
+            }
+        });
     }
 
     /**
