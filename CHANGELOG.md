@@ -25,6 +25,7 @@ Breaking changes, see [UPGRADE.md](UPGRADE.md).
 - Fix `Exists` `Encrypted` and `Hashed` rules on array values
 - Fix `HasEncryptableFieldsLog` logging non-hashed encrypted attributes in plain text, and new values as old ones
 - Fix `eloquent-hashed` auth provider failing on array credentials and ignoring closure credentials
+- Add `searchEncrypted()` scope and Filament `SearchesEncryptedAttributes` resource trait for global search
 - Add Laravel Pint, Rector and Larastan, modernize code
 
 ## [3.2.0](https://github.com/webqamdev/encryptable-fields/compare/3.1.1...3.2.0) - 2026-06-01

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB as Facade;
 use Illuminate\Support\Facades\Validator;
 use ReflectionException;
 use Webqamdev\EncryptableFields\Encryption\DatabaseEncrypter;
+use Webqamdev\EncryptableFields\Filament\Concerns\SearchesEncryptedAttributes;
 use Webqamdev\EncryptableFields\Http\Controllers\Admin\Concerns\EncryptedSearchTrait;
 use Webqamdev\EncryptableFields\Rules\Exists\Encrypted as ExistsEncrypted;
 use Webqamdev\EncryptableFields\Rules\Unique\Encrypted as UniqueEncrypted;
@@ -75,6 +76,29 @@ class DatabaseSearchTest extends TestCase
         // Plain columns are matched as is
         $hash = substr(dbHashValue('Holmes'), 0, 10);
         $this->assertSame(['Holmes'], User::query()->searchEncrypted($hash, ['firstname', 'firstname_hash'])->pluck('firstname')->all());
+    }
+
+    public function test_filament_global_search(): void
+    {
+        $resource = new class
+        {
+            use SearchesEncryptedAttributes {
+                applyGlobalSearchAttributeConstraints as public;
+            }
+
+            /**
+             * @return array<string|string[]>
+             */
+            public static function getGloballySearchableAttributes(): array
+            {
+                return [['firstname', 'email'], 'nickname'];
+            }
+        };
+
+        $query = User::query();
+        $resource::applyGlobalSearchAttributeConstraints($query, 'olm');
+
+        $this->assertSame(['Holmes'], $query->pluck('firstname')->all());
     }
 
     public function test_validation_rules(): void
