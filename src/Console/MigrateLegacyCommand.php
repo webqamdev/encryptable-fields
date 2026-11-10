@@ -13,7 +13,8 @@ use Webqamdev\EncryptableFields\Services\EncryptionInterface;
 
 /**
  * Re-computes v3 hashes (salted SHA-1) as HMAC-SHA256 and, with DatabaseEncryption,
- * re-encrypts v3 database values with the new key. Safe to run several times.
+ * re-encrypts v3 database values with the new key. With --from-plain, encrypts and hashes
+ * values stored in plain text instead. Safe to run several times.
  */
 class MigrateLegacyCommand extends Command
 {
@@ -22,6 +23,7 @@ class MigrateLegacyCommand extends Command
     protected $signature = 'encryptable-fields:migrate-legacy
                     {models* : Model classes using the EncryptableFields trait}
                     {--chunk=500 : Number of rows loaded at once}
+                    {--from-plain : Encrypt and hash values stored in plain text}
                     {--force : Force the operation to run when in production}';
 
     protected $description = 'Migrate encrypted and hashed values from encryptable-fields v3 to v4';
@@ -43,7 +45,7 @@ class MigrateLegacyCommand extends Command
 
         $legacyEncrypter = null;
 
-        if ($encryption instanceof DatabaseEncryption) {
+        if ($encryption instanceof DatabaseEncryption && ! $this->option('from-plain')) {
             $legacyKey = config('encryptable-fields.legacy_key');
 
             if (empty($legacyKey)) {
@@ -97,7 +99,17 @@ class MigrateLegacyCommand extends Command
                 continue;
             }
 
-            if (! $legacyEncrypter instanceof DatabaseEncrypter) {
+            if ($this->option('from-plain')) {
+                try {
+                    $encryption->decrypt($raw);
+
+                    continue; // already encrypted
+                } catch (DecryptException) {
+                    $value = $raw;
+                }
+
+                $updates[$key] = $encryption->encrypt($value);
+            } elseif (! $legacyEncrypter instanceof DatabaseEncrypter) {
                 $value = $encryption->decrypt($raw);
             } else {
                 try {

@@ -16,6 +16,10 @@ Encrypt Eloquent model attributes at rest, and optionally store a hash of each v
   [cipher choice](#cipher-choice))
 - Optional: [Filament](#filament) 5, [Backpack](#backpack)
 
+## Summary
+
+[[_TOC_]]
+
 ## Installation
 
 Install the package via Composer:
@@ -373,6 +377,17 @@ public function rules(): array
 With [spatie/laravel-activitylog](https://github.com/spatie/laravel-activitylog)
 or [webqamdev/activity-logger-for-laravel](https://github.com/webqamdev/activity-logger-for-laravel), add the
 `HasEncryptableFieldsLog` trait to each logged model: logs then contain encrypted values instead of decrypted ones.
+
+### Encrypting plain text values
+
+If values were stored in plain text (encryption added to an existing column, misconfigured model, ...), encrypt and hash
+them once the model is configured:
+
+```bash
+php artisan encryptable-fields:migrate-legacy "App\Models\User" --from-plain
+```
+
+Values that are already encrypted are left untouched, so the command can be run several times.
 
 ## Testing
 
