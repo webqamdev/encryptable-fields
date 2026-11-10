@@ -2,7 +2,7 @@
 
 All notable changes to `encryptable-fields` will be documented in this file
 
-## [4.1.0](https://github.com/webqamdev/encryptable-fields/compare/4.0.0...4.1.0) - Unreleased
+## [4.1.0](https://github.com/webqamdev/encryptable-fields/compare/4.0.0...4.1.0) - 2026-11-10
 
 Breaking changes, see [UPGRADE.md](UPGRADE.md).
 
