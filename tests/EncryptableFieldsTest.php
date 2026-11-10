@@ -3,6 +3,7 @@
 namespace Webqamdev\EncryptableFields\Tests;
 
 use RuntimeException;
+use Webqamdev\EncryptableFields\Exceptions\NotHashedFieldException;
 use Webqamdev\EncryptableFields\Tests\Models\User;
 
 class EncryptableFieldsTest extends TestCase
@@ -28,13 +29,16 @@ class EncryptableFieldsTest extends TestCase
         );
     }
 
+    /**
+     * @throws NotHashedFieldException
+     */
     public function test_zero_is_not_stored_as_null(): void
     {
         $user = User::query()->create(['firstname' => '0']);
 
         $this->assertNotNull($this->row($user->id)->firstname_hash);
         $this->assertSame('0', User::query()->find($user->id)->firstname);
-        $this->assertTrue(User::whereEncrypted('firstname', '0')->exists());
+        $this->assertTrue(User::whereHashed('firstname', '0')->exists());
     }
 
     public function test_empty_values_are_stored_as_null(): void
@@ -48,12 +52,24 @@ class EncryptableFieldsTest extends TestCase
         $this->assertNull($user->fresh()->firstname);
     }
 
-    public function test_where_encrypted_scope(): void
+    /**
+     * @throws NotHashedFieldException
+     */
+    public function test_where_hashed_scope(): void
     {
         User::query()->create(['firstname' => 'watson']);
         User::query()->create(['firstname' => 'holmes']);
 
+        $this->assertSame('holmes', User::whereHashed('firstname', 'holmes')->sole()->firstname);
+        // Without DatabaseEncryption, whereEncrypted falls back to whereHashed
         $this->assertSame('holmes', User::whereEncrypted('firstname', 'holmes')->sole()->firstname);
+    }
+
+    public function test_where_hashed_scope_requires_hash_column(): void
+    {
+        $this->expectException(NotHashedFieldException::class);
+
+        User::whereEncrypted('email', 'jack@example.com');
     }
 
     public function test_reading_does_not_dirty_the_model(): void

@@ -1,5 +1,19 @@
 # Upgrade guide
 
+## From 4.0 to 4.1
+
+The `whereEncrypted()` scope was renamed to `whereHashed()`. A new `whereEncrypted()` scope matches the decrypted value
+with `DatabaseEncryption`, and falls back to `whereHashed()` otherwise.
+
+- Default `Encryption` service: nothing changes.
+- `DatabaseEncryption`: `whereEncrypted()` now decrypts every row instead of using the hash column, and no longer throws
+  `NotHashedFieldException` on attributes without hash column. Replace it with `whereHashed()` to keep using the hash
+  column (indexable):
+
+  ```php
+  User::query()->whereHashed('email', 'john.watson@example.com')->first();
+  ```
+
 ## From 3.x to 4.0
 
 v4 changes how values are hashed and, with `DatabaseEncryption`, how they are encrypted. **Existing data must be
